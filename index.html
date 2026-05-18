@@ -34,6 +34,18 @@
       <form id="plantForm" autocomplete="off">
         <input type="hidden" id="plantId" name="plantId" />
         <input type="hidden" id="sectionId" name="sectionId" />
+        <input type="hidden" id="careProfile" name="careProfile" />
+
+        <div class="lookup-panel" aria-live="polite">
+          <label for="lookupInput">Plant Lookup</label>
+          <p class="lookup-help">Enter a plant name or paste plant-tag text, then use the local mock LLM-style provider to suggest care.</p>
+          <div class="lookup-row">
+            <input id="lookupInput" type="text" placeholder="Example: Bush Early Girl Tomato" />
+            <button type="button" class="btn-secondary" id="lookupBtn">Look Up Care Info</button>
+          </div>
+          <p class="lookup-status" id="lookupStatus"></p>
+          <div class="lookup-preview" id="lookupPreview" hidden></div>
+        </div>
 
         <label for="name">Plant Name</label>
         <input id="name" name="name" type="text" placeholder="Example: Sweet Basil" required />
