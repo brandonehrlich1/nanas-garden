@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nana's Garden Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Nana's Garden Tracker</h1>
+    <p>Pick a section, add your plant details, and get simple seasonal reminders.</p>
+  </header>
+
+  <main class="app-layout">
+    <aside class="sections-panel">
+      <h2>Plant Sections</h2>
+      <button class="section-btn active" data-section="sectionA">Section A</button>
+      <button class="section-btn" data-section="sectionB">Section B</button>
+      <p class="season-pill" id="seasonPill"></p>
+      <div class="season-change" id="seasonChange"></div>
+    </aside>
+
+    <section class="editor-panel">
+      <h2 id="sectionTitle">Section A</h2>
+
+      <form id="plantForm" autocomplete="off">
+        <label for="plantName">Plant Name</label>
+        <input id="plantName" name="plantName" type="text" placeholder="e.g., Basil" required />
+
+        <label for="plantDate">Planting Date</label>
+        <input id="plantDate" name="plantDate" type="date" required />
+
+        <label for="plantNotes">Notes</label>
+        <textarea id="plantNotes" name="plantNotes" rows="5" placeholder="Sunlight, growth, fertilizer notes..."></textarea>
+
+        <button type="submit">Save Plant Info</button>
+      </form>
+
+      <article class="details-card">
+        <h3>Saved Details</h3>
+        <p><strong>Name:</strong> <span id="savedName">—</span></p>
+        <p><strong>Planted:</strong> <span id="savedDate">—</span></p>
+        <p><strong>Notes:</strong></p>
+        <p id="savedNotes" class="notes-display">No notes yet.</p>
+      </article>
+
+      <article class="details-card">
+        <h3>Care Reminders</h3>
+        <ul id="remindersList"></ul>
+      </article>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
