@@ -7,48 +7,83 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
+  <header class="top-header">
     <h1>Nana's Garden Tracker</h1>
-    <p>Pick a section, add your plant details, and get simple seasonal reminders.</p>
+    <p>Two cozy sections for Nana's potted plants. Tap a spot to add or update details.</p>
   </header>
 
-  <main class="app-layout">
-    <aside class="sections-panel">
-      <h2>Plant Sections</h2>
-      <button class="section-btn active" data-section="sectionA">Section A</button>
-      <button class="section-btn" data-section="sectionB">Section B</button>
+  <main class="app-shell">
+    <section class="season-panel card">
+      <h2>Season & Helpful Tips</h2>
       <p class="season-pill" id="seasonPill"></p>
-      <div class="season-change" id="seasonChange"></div>
-    </aside>
+      <p id="seasonTip"></p>
+      <p id="seasonChange"></p>
+      <ul id="categoryTips" class="tips-list"></ul>
+      <p class="disclaimer">Suggestions are general; adjust for the actual plant tag, weather, and pot conditions.</p>
+    </section>
 
-    <section class="editor-panel">
-      <h2 id="sectionTitle">Section A</h2>
+    <section class="garden-panel card">
+      <div class="panel-head">
+        <h2>Garden Layout</h2>
+      </div>
+      <div id="sectionsWrap" class="sections-wrap"></div>
+    </section>
 
+    <section class="editor-panel card">
+      <h2 id="editorTitle">Add a Plant Spot</h2>
       <form id="plantForm" autocomplete="off">
-        <label for="plantName">Plant Name</label>
-        <input id="plantName" name="plantName" type="text" placeholder="e.g., Basil" required />
+        <input type="hidden" id="plantId" name="plantId" />
+        <input type="hidden" id="sectionId" name="sectionId" />
 
-        <label for="plantDate">Planting Date</label>
-        <input id="plantDate" name="plantDate" type="date" required />
+        <label for="name">Plant Name</label>
+        <input id="name" name="name" type="text" placeholder="Example: Sweet Basil" required />
 
-        <label for="plantNotes">Notes</label>
-        <textarea id="plantNotes" name="plantNotes" rows="5" placeholder="Sunlight, growth, fertilizer notes..."></textarea>
+        <label for="plantType">Plant Type</label>
+        <select id="plantType" name="plantType">
+          <option value="flower">Flower</option>
+          <option value="herb">Herb</option>
+          <option value="vegetable">Vegetable</option>
+          <option value="other">Other</option>
+        </select>
 
-        <button type="submit">Save Plant Info</button>
+        <label for="plantingDate">Planting Date</label>
+        <input id="plantingDate" name="plantingDate" type="date" required />
+
+        <label for="sunlight">Sunlight</label>
+        <select id="sunlight" name="sunlight">
+          <option value="full sun">Full sun</option>
+          <option value="partial sun">Partial sun</option>
+          <option value="shade">Shade</option>
+          <option value="unknown">Unknown</option>
+        </select>
+
+        <label for="wateringFrequency">Watering Frequency</label>
+        <select id="wateringFrequency" name="wateringFrequency">
+          <option value="daily">Daily</option>
+          <option value="every 2-3 days">Every 2-3 days</option>
+          <option value="weekly">Weekly</option>
+          <option value="unknown">Unknown</option>
+        </select>
+
+        <label for="lastWatered">Last Watered Date</label>
+        <input id="lastWatered" name="lastWatered" type="date" />
+
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="thriving">Thriving</option>
+          <option value="watch">Watch</option>
+          <option value="struggling">Struggling</option>
+          <option value="done/removed">Done/removed</option>
+        </select>
+
+        <label for="notes">Quick Care Note</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Any easy reminder for Nana..."></textarea>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="saveBtn">Save Plant Spot</button>
+          <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
+        </div>
       </form>
-
-      <article class="details-card">
-        <h3>Saved Details</h3>
-        <p><strong>Name:</strong> <span id="savedName">—</span></p>
-        <p><strong>Planted:</strong> <span id="savedDate">—</span></p>
-        <p><strong>Notes:</strong></p>
-        <p id="savedNotes" class="notes-display">No notes yet.</p>
-      </article>
-
-      <article class="details-card">
-        <h3>Care Reminders</h3>
-        <ul id="remindersList"></ul>
-      </article>
     </section>
   </main>
 
