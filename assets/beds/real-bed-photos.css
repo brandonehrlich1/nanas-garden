@@ -1,0 +1,53 @@
+/* Real Nana garden bed photo layer.
+   The app remains one consolidated GitHub Pages interface: real bed photos below, mapped plant artwork above. */
+.bed-map {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  isolation: isolate;
+}
+
+.bed-map-sectionA {
+  background-image:
+    linear-gradient(rgba(55, 35, 20, .16), rgba(55, 35, 20, .18)),
+    url('upper-bed.jpg');
+}
+
+.bed-map-sectionB {
+  background-image:
+    linear-gradient(rgba(55, 35, 20, .12), rgba(55, 35, 20, .16)),
+    url('lower-bed.jpg');
+}
+
+.bed-map .soil-texture,
+.bed-map .bed-path {
+  opacity: .08;
+  mix-blend-mode: soft-light;
+}
+
+.bed-map::before {
+  border-color: rgba(255, 243, 210, .18);
+  background: radial-gradient(circle at 50% 44%, rgba(255, 244, 218, .07), transparent 55%);
+}
+
+.bed-map::after {
+  z-index: 8;
+}
+
+.plant-marker {
+  z-index: 6;
+}
+
+.plant-asset-img {
+  filter: drop-shadow(0 4px 7px rgba(12, 7, 3, .42));
+}
+
+.plant-label {
+  background: rgba(32, 22, 13, .48);
+  border-color: rgba(255, 246, 221, .28);
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+
+.section-card-head p::after {
+  content: ' · real photo map';
+}
