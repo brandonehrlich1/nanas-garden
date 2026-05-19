@@ -350,3 +350,16 @@ button:disabled { cursor: wait; opacity: 0.7; }
   .sections-wrap { gap: 1.2rem; }
   .bed-map { min-height: 460px; }
 }
+
+.daily-summary{margin:0.8rem 0 1rem;padding:0.9rem;border-radius:20px;background:linear-gradient(180deg,#fff8ea,#f8f0e0);border:1px solid var(--border)}
+.daily-summary h3{margin:0 0 .45rem;font-size:1.2rem}
+.daily-summary ul{margin:.2rem 0 0;padding-left:1.2rem}
+.daily-summary li{margin:.3rem 0}
+.bed-map{cursor:pointer;position:relative}
+.bed-map::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--tap-x,50%) var(--tap-y,50%), rgba(255,241,200,.35), transparent 24%);opacity:var(--tap-visible,0);transition:opacity .35s ease;pointer-events:none}
+.empty-placement{position:absolute;transform:translate(-50%,-50%);width:2.6rem;height:2.6rem;border-radius:999px;border:2px dashed rgba(255,247,220,.9);background:rgba(255,255,255,.2);box-shadow:0 0 0 6px rgba(255,255,255,.12)}
+.plant-marker{width:clamp(6.3rem,28vw,9.6rem);transition:transform .2s ease, box-shadow .2s ease}
+.plant-marker.is-selected{transform:translate(-50%,-56%) scale(1.05);box-shadow:0 0 0 5px rgba(246,216,137,.5),0 12px 24px rgba(26,42,22,.35)}
+.plant-art{font-size:2rem;line-height:1}
+.lookup-panel{background:#fff9f0}
+@media (max-width:640px){button,.btn-secondary{padding:.9rem 1rem}.card{padding:1.1rem}.plant-sheet{padding:1rem}}

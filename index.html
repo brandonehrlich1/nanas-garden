@@ -10,18 +10,19 @@
   <header class="top-header">
     <p class="eyebrow">🌼 Nana's Garden</p>
     <h1>Virtual Garden</h1>
-    <p>Tap a plant to see watering, notes, and gentle care reminders.</p>
+    <p>Tap anywhere in a bed to check on a plant or add a new one.</p>
   </header>
 
   <main class="app-shell">
     <section class="garden-panel card" aria-labelledby="gardenTitle">
       <div class="panel-head">
         <div>
-          <h2 id="gardenTitle">Today in the Garden</h2>
+          <h2 id="gardenTitle">Today in Nana's Garden</h2>
           <p>Two cozy raised beds, already planted just like Nana's garden.</p>
         </div>
         <button type="button" class="btn-secondary small-action" id="showAddPlantBtn">+ Add Plant</button>
       </div>
+      <div id="dailySummary" class="daily-summary card-soft" aria-live="polite"></div>
       <div id="sectionsWrap" class="sections-wrap"></div>
     </section>
 
@@ -66,11 +67,11 @@
           </select>
 
           <div class="lookup-panel" aria-live="polite">
-            <label for="lookupInput">Care lookup</label>
-            <p class="lookup-help">Optional: choose local care tips for tomatoes, cucumber, jalapeño, or marigolds.</p>
+            <label for="lookupInput">What did the plant tag say?</label>
+            <p class="lookup-help">Just type what you see on the tag. I'll find the closest match.</p>
             <div class="lookup-row">
               <input id="lookupInput" type="text" placeholder="Example: Bush Early Girl Tomato" />
-              <button type="button" class="btn-secondary" id="lookupBtn">Find Care Tips</button>
+              <button type="button" class="btn-secondary" id="lookupBtn">Find Match</button>
             </div>
             <p class="lookup-status" id="lookupStatus"></p>
             <div class="lookup-preview" id="lookupPreview" hidden></div>
@@ -79,7 +80,7 @@
           <label for="name">Plant name</label>
           <input id="name" name="name" type="text" placeholder="Example: Roma Tomato" required />
 
-          <label for="plantType">Plant kind</label>
+          <label for="plantType">Plant type (optional)</label>
           <select id="plantType" name="plantType">
             <option value="flower">Flower</option>
             <option value="herb">Herb</option>
