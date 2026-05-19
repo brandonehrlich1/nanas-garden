@@ -1,0 +1,59 @@
+:root {
+  --plant-art-note: 'Generated plant art is represented by curated illustration-card fallbacks until binary image assets are committed.';
+}
+
+.plant-art-card {
+  min-height: 210px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  color: #2f261c;
+  border: 1px solid rgba(141, 91, 50, 0.25);
+  box-shadow: inset 0 0 36px rgba(255,255,255,0.45);
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255,255,255,0.55), transparent 34%),
+    radial-gradient(circle at 24% 16%, rgba(246,216,137,0.45), transparent 22%),
+    linear-gradient(145deg, #fff7e8, #e8f1dd);
+}
+
+.plant-art-icon {
+  font-size: clamp(4rem, 18vw, 7rem);
+  line-height: 1;
+  filter: drop-shadow(0 8px 12px rgba(63, 70, 38, 0.16));
+}
+
+.plant-art-name {
+  font-weight: 900;
+  font-size: clamp(1.25rem, 5vw, 1.7rem);
+  max-width: 16rem;
+}
+
+.plant-art-card.tomato {
+  background:
+    radial-gradient(circle at 50% 31%, rgba(255,255,255,0.56), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(223,90,52,0.20), transparent 22%),
+    linear-gradient(145deg, #fff4e6, #e6f0d7);
+}
+
+.plant-art-card.pepper {
+  background:
+    radial-gradient(circle at 50% 31%, rgba(255,255,255,0.56), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(78,139,70,0.25), transparent 22%),
+    linear-gradient(145deg, #fff8e9, #e3f0db);
+}
+
+.plant-art-card.cucumber {
+  background:
+    radial-gradient(circle at 50% 31%, rgba(255,255,255,0.56), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(92,154,82,0.25), transparent 22%),
+    linear-gradient(145deg, #f8fff0, #dfeeda);
+}
+
+.plant-art-card.marigold {
+  background:
+    radial-gradient(circle at 50% 31%, rgba(255,255,255,0.56), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(241,171,60,0.34), transparent 22%),
+    linear-gradient(145deg, #fff3d4, #eef2da);
+}
