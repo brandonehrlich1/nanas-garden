@@ -1,8 +1,8 @@
-const STORAGE_KEY = 'nanasGardenDataV4';
-const PREVIOUS_STORAGE_KEYS = ['nanasGardenDataV3', 'nanasGardenDataV2', 'nanasGardenData'];
+const STORAGE_KEY = 'nanasGardenDataV5LeftRight';
+const PREVIOUS_STORAGE_KEYS = ['nanasGardenDataV4', 'nanasGardenDataV3', 'nanasGardenDataV2', 'nanasGardenData'];
 const SECTIONS = [
-  { id: 'sectionA', label: 'Upper Bed', nickname: 'Raised Bed A' },
-  { id: 'sectionB', label: 'Lower Bed', nickname: 'Raised Bed B' }
+  { id: 'sectionA', label: 'Left Bed', nickname: 'Left raised bed' },
+  { id: 'sectionB', label: 'Right Bed', nickname: 'Right raised bed' }
 ];
 
 const PLANT_TYPE_TIPS = {
@@ -20,15 +20,15 @@ const WATERING_INTERVAL_DAYS = {
 };
 
 const SPOT_PRESETS = {
-  'upper-left': { label: 'Upper left', x: 22, y: 20 },
-  'upper-middle': { label: 'Upper middle', x: 50, y: 25 },
-  'upper-right': { label: 'Upper right', x: 74, y: 22 },
+  'upper-left': { label: 'Top left', x: 22, y: 20 },
+  'upper-middle': { label: 'Top middle', x: 50, y: 25 },
+  'upper-right': { label: 'Top right', x: 74, y: 22 },
   'middle-left': { label: 'Middle left', x: 34, y: 50 },
   center: { label: 'Center', x: 54, y: 46 },
   'middle-right': { label: 'Middle right', x: 64, y: 48 },
-  'lower-left': { label: 'Lower left', x: 30, y: 72 },
-  'lower-middle': { label: 'Lower middle', x: 50, y: 74 },
-  'lower-right': { label: 'Lower right', x: 74, y: 76 }
+  'lower-left': { label: 'Bottom left', x: 30, y: 72 },
+  'lower-middle': { label: 'Bottom middle', x: 50, y: 74 },
+  'lower-right': { label: 'Bottom right', x: 74, y: 76 }
 };
 
 const PLANT_ASSETS = {
@@ -81,6 +81,16 @@ const MOCK_PLANT_PROFILES = [
     careNotes: 'Sweet yellow-orange cherry tomato with vigorous growth. It benefits from a tall cage, even moisture, and regular picking.',
     generatedTasks: ['Pick ripe fruit often to keep production going.', 'Check that vines are supported after storms or wind.', 'Mulch the soil surface to help even out moisture.'],
     tags: ['tomato', 'yellow cherry', 'indeterminate']
+  }),
+  makeMockProfile({
+    lookupKey: 'grape tomato',
+    commonName: 'Grape Tomato',
+    plantType: 'vegetable',
+    sunlight: 'full sun',
+    wateringFrequency: 'daily',
+    careNotes: 'Small-fruited tomato that needs steady water, support, and frequent picking.',
+    generatedTasks: ['Pick ripe grape tomatoes often.', 'Guide vines back into the cage or onto supports.', 'Check soil moisture during hot weather.'],
+    tags: ['tomato', 'grape', 'small fruit']
   }),
   makeMockProfile({
     lookupKey: 'jalapeno pepper',
@@ -163,14 +173,6 @@ function loadState() {
     const currentRaw = localStorage.getItem(STORAGE_KEY);
     if (currentRaw) return normalizeState(JSON.parse(currentRaw));
 
-    for (const key of PREVIOUS_STORAGE_KEYS) {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const migrated = key === 'nanasGardenData' ? migrateLegacyData(JSON.parse(raw)) : normalizeState(JSON.parse(raw));
-      saveState(migrated);
-      return migrated;
-    }
-
     const seeded = createSeededState();
     saveState(seeded);
     return seeded;
@@ -193,19 +195,22 @@ function createSeededState() {
   const lastWatered = getTodayISO();
   const seed = createEmptyState();
   seed.sections.sectionA = [
-    seedPlant('sectionA', 'Bush Early Girl Tomato', 'upper-right', 72, 18, '🍅', plantedOn, lastWatered, 'Already tucked into the upper right of the upper bed.'),
-    seedPlant('sectionA', 'Sun Sugar Yellow Cherry Tomato', 'middle-right', 64, 48, '🍅', plantedOn, lastWatered, 'A sweet yellow cherry tomato in the middle right.'),
-    seedPlant('sectionA', 'Sweet Million Cherry Tomato', 'lower-right', 72, 74, '🍅', plantedOn, lastWatered, 'Cherry tomato in the lower right corner.'),
-    seedPlant('sectionA', 'Roma Tomato', 'lower-left', 30, 72, '🍅', plantedOn, lastWatered, 'Roma tomato in the lower left.'),
-    seedPlant('sectionA', 'Marigold cluster', 'middle-left', 38, 45, '🌼', plantedOn, lastWatered, 'Bright companion flowers near the middle left.'),
-    seedPlant('sectionA', 'Marigold cluster', 'upper-middle', 50, 25, '🌼', plantedOn, lastWatered, 'Sunny marigolds near the upper middle.')
+    seedPlant('sectionA', 'Slicing Cucumber', 'upper-left', 24, 18, '🥒', plantedOn, lastWatered, 'Slicing cucumber in the top left of the left bed.'),
+    seedPlant('sectionA', 'Slicing Cucumber', 'upper-right', 76, 18, '🥒', plantedOn, lastWatered, 'Slicing cucumber in the top right of the left bed.'),
+    seedPlant('sectionA', 'Marigold cluster', 'middle-left', 42, 48, '🌼', plantedOn, lastWatered, 'Companion marigolds near the center of the left bed.'),
+    seedPlant('sectionA', 'Marigold cluster', 'middle-right', 58, 48, '🌼', plantedOn, lastWatered, 'Companion marigolds near the center of the left bed.'),
+    seedPlant('sectionA', 'Bush Early Girl Tomato', 'lower-left', 28, 78, '🍅', plantedOn, lastWatered, 'Bush Early Girl tomato in the bottom left of the left bed.'),
+    seedPlant('sectionA', 'Jalapeño Pepper', 'lower-right', 72, 78, '🌶️', plantedOn, lastWatered, 'Jalapeño pepper in the bottom right of the left bed.')
   ];
   seed.sections.sectionB = [
-    seedPlant('sectionB', 'Slicing Cucumber', 'upper-left', 22, 20, '🥒', plantedOn, lastWatered, 'Cucumber placed in the upper left.'),
-    seedPlant('sectionB', 'Jalapeño Pepper', 'upper-right', 74, 22, '🌶️', plantedOn, lastWatered, 'Pepper plant in the upper right.'),
-    seedPlant('sectionB', 'Marigold cluster', 'middle-left', 34, 50, '🌼', plantedOn, lastWatered, 'Marigolds in the center-left area.'),
-    seedPlant('sectionB', 'Marigold cluster', 'center', 54, 46, '🌼', plantedOn, lastWatered, 'Marigolds blooming near the center.'),
-    seedPlant('sectionB', 'Tomato plant', 'lower-right', 74, 76, '🍅', plantedOn, lastWatered, 'Tomato plant in the lower right.')
+    seedPlant('sectionB', 'Roma Tomato', 'upper-left', 24, 18, '🍅', plantedOn, lastWatered, 'Roma tomato in the top left of the right bed.'),
+    seedPlant('sectionB', 'Grape Tomato', 'upper-right', 76, 18, '🍅', plantedOn, lastWatered, 'Grape tomato in the top right of the right bed.'),
+    seedPlant('sectionB', 'Marigold cluster', 'upper-middle', 50, 38, '🌼', plantedOn, lastWatered, 'Top marigold in the T pattern.'),
+    seedPlant('sectionB', 'Marigold cluster', 'middle-left', 38, 50, '🌼', plantedOn, lastWatered, 'Left marigold in the T pattern.'),
+    seedPlant('sectionB', 'Marigold cluster', 'center', 50, 50, '🌼', plantedOn, lastWatered, 'Center marigold in the T pattern.'),
+    seedPlant('sectionB', 'Marigold cluster', 'middle-right', 62, 50, '🌼', plantedOn, lastWatered, 'Right marigold in the T pattern.'),
+    seedPlant('sectionB', 'Sun Sugar Yellow Cherry Tomato', 'lower-left', 28, 78, '🍅', plantedOn, lastWatered, 'Sun Sugar yellow cherry tomato in the bottom left of the right bed.'),
+    seedPlant('sectionB', 'Sweet Million Cherry Tomato', 'lower-right', 72, 78, '🍅', plantedOn, lastWatered, 'Sweet Million cherry tomato in the bottom right of the right bed.')
   ];
   return seed;
 }
@@ -499,6 +504,7 @@ function getPlantAssetKey(plant) {
   const name = (plant.name || '').toLowerCase();
   if (name.includes('bush early girl') || name.includes('early girl')) return 'bush-early-girl-tomato';
   if (name.includes('roma')) return 'roma-tomato';
+  if (name.includes('grape')) return 'sweet-million-tomato';
   if (name.includes('sweet million')) return 'sweet-million-tomato';
   if (name.includes('sun sugar') || name.includes('yellow cherry')) return 'sun-sugar-tomato';
   if (name.includes('jalape') || name.includes('pepper')) return 'jalapeno-pepper';
@@ -690,7 +696,7 @@ function createMockPlantLookupProvider(profiles) {
     async lookupCareProfile(query) {
       const normalizedQuery = normalizeLookupText(query);
       const matchedProfile = findMockProfile(normalizedQuery, profilesByKey);
-      if (!matchedProfile) throw new Error('No local care tips matched that plant yet. Try tomato, cucumber, jalapeño, or marigold.');
+      if (!matchedProfile) throw new Error('No local care tips matched that plant yet. Try tomato, grape tomato, cucumber, jalapeño, or marigold.');
       return normalizeCareProfile({ ...matchedProfile, provider: this.providerName, matchedFrom: matchedProfile.commonName });
     }
   };
@@ -838,7 +844,7 @@ function makeButton(label, className, onClick) {
 }
 
 function sectionLabel(sectionId) {
-  return sectionId === 'sectionB' ? 'Lower Bed' : 'Upper Bed';
+  return sectionId === 'sectionB' ? 'Right Bed' : 'Left Bed';
 }
 
 function capitalize(text) {
