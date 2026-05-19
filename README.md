@@ -4,7 +4,7 @@
 Nana's Garden Tracker is a simple static web app that opens directly to a warm **Virtual Garden** view of Nana’s two raised garden beds.
 
 It includes:
-- A cute CSS/SVG-style schematic of the **Upper Bed / Raised Bed A** and **Lower Bed / Raised Bed B**.
+- A cute raised-bed schematic of the **Left Bed** and **Right Bed**.
 - Nana's seeded tomatoes, cucumber, jalapeño pepper, and marigold clusters placed in their real garden spots.
 - Large tappable plant markers with emoji/icons and plant names.
 - A simple plant detail card with water status, care tips, notes, and quick actions.
@@ -22,8 +22,8 @@ No build tools or dependencies are required.
 The app saves garden and plant data in your browser `localStorage`.
 
 Storage keys:
-- `nanasGardenDataV4` (current)
-- `nanasGardenDataV3`, `nanasGardenDataV2`, and `nanasGardenData` (older app data is migrated when possible)
+- `nanasGardenDataV5LeftRight` (current)
+- `nanasGardenDataV4`, `nanasGardenDataV3`, `nanasGardenDataV2`, and `nanasGardenData` (older app data is retained only as previous local data)
 
 The app keeps plant placement and care data internally so Nana sees friendly words like bed, plant, spot, and garden instead of setup details.
 
