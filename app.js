@@ -1,8 +1,9 @@
-const STORAGE_KEY = 'nanasGardenDataV2';
+const STORAGE_KEY = 'nanasGardenDataV3';
+const PREVIOUS_STORAGE_KEY = 'nanasGardenDataV2';
 const LEGACY_STORAGE_KEY = 'nanasGardenData';
 const SECTIONS = [
-  { id: 'sectionA', label: 'Section A' },
-  { id: 'sectionB', label: 'Section B' }
+  { id: 'sectionA', label: 'Raised Bed A' },
+  { id: 'sectionB', label: 'Raised Bed B' }
 ];
 
 const PLANT_TYPE_TIPS = {
@@ -150,12 +151,18 @@ renderGarden();
 resetForm();
 
 function loadState() {
-  const cleanState = { sections: { sectionA: [], sectionB: [] } };
+  const cleanState = createEmptyState();
   try {
-    const v2Raw = localStorage.getItem(STORAGE_KEY);
-    if (v2Raw) {
-      const parsedV2 = JSON.parse(v2Raw);
-      return normalizeState(parsedV2);
+    const currentRaw = localStorage.getItem(STORAGE_KEY);
+    if (currentRaw) {
+      return normalizeState(JSON.parse(currentRaw));
+    }
+
+    const previousRaw = localStorage.getItem(PREVIOUS_STORAGE_KEY);
+    if (previousRaw) {
+      const migrated = normalizeState(JSON.parse(previousRaw));
+      saveState(migrated);
+      return migrated;
     }
 
     const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -168,24 +175,46 @@ function loadState() {
   }
 }
 
+function createEmptyState() {
+  return {
+    sections: { sectionA: [], sectionB: [] },
+    beds: {
+      sectionA: { backgroundImage: '' },
+      sectionB: { backgroundImage: '' }
+    }
+  };
+}
+
 function normalizeState(state) {
-  const base = { sections: { sectionA: [], sectionB: [] } };
+  const base = createEmptyState();
   if (!state || typeof state !== 'object' || !state.sections) return base;
 
   for (const section of SECTIONS) {
     const spots = Array.isArray(state.sections[section.id]) ? state.sections[section.id] : [];
-    base.sections[section.id] = spots.map(normalizePlant).filter(Boolean);
+    base.sections[section.id] = spots.map((plant, index) => normalizePlant(plant, index)).filter(Boolean);
+    base.beds[section.id] = normalizeBed(state.beds?.[section.id]);
   }
 
   return base;
 }
 
-function normalizePlant(plant) {
+function normalizeBed(bed) {
+  return { backgroundImage: typeof bed?.backgroundImage === 'string' ? bed.backgroundImage : '' };
+}
+
+function normalizePlant(plant, index = 0) {
   if (!plant || typeof plant !== 'object') return null;
+  const defaultZone = getDefaultZone(index);
+  const name = String(plant.name || '').trim();
   return {
     id: String(plant.id || createPlantId()),
     sectionId: plant.sectionId === 'sectionB' ? 'sectionB' : 'sectionA',
-    name: String(plant.name || '').trim(),
+    zoneLabel: String(plant.zoneLabel || plant.label || name || `Zone ${index + 1}`).trim(),
+    zoneX: clampPercent(plant.zoneX ?? plant.x, defaultZone.x, 0, 92),
+    zoneY: clampPercent(plant.zoneY ?? plant.y, defaultZone.y, 0, 92),
+    zoneWidth: clampPercent(plant.zoneWidth ?? plant.width, defaultZone.width, 8, 100),
+    zoneHeight: clampPercent(plant.zoneHeight ?? plant.height, defaultZone.height, 8, 100),
+    name,
     plantType: asEnum(plant.plantType, ['flower', 'herb', 'vegetable', 'other'], 'other'),
     plantingDate: plant.plantingDate || '',
     sunlight: asEnum(plant.sunlight, ['full sun', 'partial sun', 'shade', 'unknown'], 'unknown'),
@@ -198,7 +227,7 @@ function normalizePlant(plant) {
 }
 
 function migrateLegacyData(legacyData) {
-  const state = { sections: { sectionA: [], sectionB: [] } };
+  const state = createEmptyState();
 
   for (const section of SECTIONS) {
     const legacyPlant = legacyData?.[section.id];
@@ -255,7 +284,12 @@ function readPlantFromForm() {
     notes: formData.get('notes'),
     lastWatered: formData.get('lastWatered'),
     status: formData.get('status'),
-    careProfile: readCareProfileFromForm(formData)
+    careProfile: readCareProfileFromForm(formData),
+    zoneLabel: formData.get('zoneLabel'),
+    zoneX: formData.get('zoneX'),
+    zoneY: formData.get('zoneY'),
+    zoneWidth: formData.get('zoneWidth'),
+    zoneHeight: formData.get('zoneHeight')
   });
 }
 
@@ -297,11 +331,16 @@ function startEdit(sectionId, plantId) {
   if (!plant) return;
 
   editingPlantId = plantId;
-  editorTitle.textContent = `Edit Plant Spot (${sectionLabel(sectionId)})`;
-  saveBtn.textContent = 'Update Plant Spot';
+  editorTitle.textContent = plant.name ? `Tend ${plant.name} (${sectionLabel(sectionId)})` : `Plant ${plant.zoneLabel} (${sectionLabel(sectionId)})`;
+  saveBtn.textContent = plant.name ? 'Update Growing Zone' : 'Plant This Zone';
 
   setValue('plantId', plant.id);
   setValue('sectionId', plant.sectionId);
+  setValue('zoneLabel', plant.zoneLabel);
+  setValue('zoneX', plant.zoneX);
+  setValue('zoneY', plant.zoneY);
+  setValue('zoneWidth', plant.zoneWidth);
+  setValue('zoneHeight', plant.zoneHeight);
   setValue('name', plant.name);
   setValue('plantType', plant.plantType);
   setValue('plantingDate', plant.plantingDate);
@@ -327,11 +366,16 @@ function resetForm() {
   setValue('sunlight', 'full sun');
   setValue('wateringFrequency', 'daily');
   setValue('careProfile', '');
+  setValue('zoneLabel', '');
+  setValue('zoneX', 12);
+  setValue('zoneY', 12);
+  setValue('zoneWidth', 30);
+  setValue('zoneHeight', 24);
   lookupInput.value = '';
   lookupStatus.textContent = '';
   showLookupPreview(null);
-  editorTitle.textContent = 'Add a Plant Spot';
-  saveBtn.textContent = 'Save Plant Spot';
+  editorTitle.textContent = 'Plant a Growing Zone';
+  saveBtn.textContent = 'Save Growing Zone';
 }
 
 function renderGarden() {
@@ -340,20 +384,27 @@ function renderGarden() {
     const sectionCard = document.createElement('article');
     sectionCard.className = 'section-card';
 
-    const title = document.createElement('h3');
-    title.textContent = section.label;
-    sectionCard.appendChild(title);
-
-    const grid = document.createElement('div');
-    grid.className = 'spots-grid';
+    const header = document.createElement('div');
+    header.className = 'section-card-head';
+    header.innerHTML = `
+      <div>
+        <h3>${escapeHtml(section.label)}</h3>
+        <p>A real-photo bed map with gentle tappable growing zones.</p>
+      </div>
+    `;
+    sectionCard.appendChild(header);
+    sectionCard.appendChild(createBedToolbar(section));
+    sectionCard.appendChild(createBedMap(section));
 
     const plants = appState.sections[section.id];
     if (plants.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'empty-note';
-      empty.textContent = 'No plant spots yet. Add one below.';
+      empty.textContent = 'No mapped zones yet. Add a photo, then make the first cozy growing zone.';
       sectionCard.appendChild(empty);
     } else {
+      const grid = document.createElement('div');
+      grid.className = 'spots-grid';
       plants.forEach((plant) => {
         grid.appendChild(createSpotCard(section.id, plant));
       });
@@ -362,11 +413,12 @@ function renderGarden() {
 
     const addBtn = document.createElement('button');
     addBtn.className = 'btn-secondary';
-    addBtn.textContent = `+ Add plant to ${section.label}`;
+    addBtn.textContent = `+ Plant a zone in ${section.label}`;
     addBtn.addEventListener('click', () => {
       resetForm();
       setValue('sectionId', section.id);
-      editorTitle.textContent = `Add a Plant Spot (${section.label})`;
+      setValue('zoneLabel', `New ${section.label} zone`);
+      editorTitle.textContent = `Plant a Growing Zone (${section.label})`;
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
 
@@ -375,29 +427,160 @@ function renderGarden() {
   }
 }
 
+function createBedToolbar(section) {
+  const toolbar = document.createElement('div');
+  toolbar.className = 'bed-toolbar';
+
+  const uploadLabel = document.createElement('label');
+  uploadLabel.className = 'photo-upload btn-secondary';
+  uploadLabel.textContent = appState.beds[section.id].backgroundImage ? 'Change bed photo' : 'Add bed photo';
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.addEventListener('change', (event) => handleBedPhotoUpload(section.id, event));
+  uploadLabel.appendChild(input);
+
+  const zoneBtn = makeButton('+ Empty zone', 'btn-secondary', () => addEmptyZone(section.id));
+  toolbar.appendChild(uploadLabel);
+  toolbar.appendChild(zoneBtn);
+
+  if (appState.beds[section.id].backgroundImage) {
+    toolbar.appendChild(makeButton('Remove photo', 'btn-secondary', () => removeBedPhoto(section.id)));
+  }
+
+  return toolbar;
+}
+
+function createBedMap(section) {
+  const bed = appState.beds[section.id];
+  const map = document.createElement('div');
+  map.className = bed.backgroundImage ? 'bed-map has-photo' : 'bed-map';
+
+  if (bed.backgroundImage) {
+    const img = document.createElement('img');
+    img.src = bed.backgroundImage;
+    img.alt = `${section.label} garden bed photo`;
+    map.appendChild(img);
+  } else {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'bed-placeholder';
+    placeholder.innerHTML = `
+      <span>🌿</span>
+      <strong>Add the real ${escapeHtml(section.label)} photo</strong>
+      <small>Then place growing zones over the picture.</small>
+    `;
+    map.appendChild(placeholder);
+  }
+
+  appState.sections[section.id].forEach((plant) => {
+    map.appendChild(createZoneButton(section.id, plant));
+  });
+
+  return map;
+}
+
+function createZoneButton(sectionId, plant) {
+  const zone = document.createElement('button');
+  const waterInfo = getWateringStatus(plant);
+  const isEmpty = !plant.name;
+  zone.type = 'button';
+  zone.className = `zone-marker ${isEmpty ? 'zone-empty' : 'zone-filled'}`;
+  zone.style.left = `${plant.zoneX}%`;
+  zone.style.top = `${plant.zoneY}%`;
+  zone.style.width = `${plant.zoneWidth}%`;
+  zone.style.height = `${plant.zoneHeight}%`;
+  zone.setAttribute('aria-label', isEmpty ? `Plant ${plant.zoneLabel}` : `Open details for ${plant.name}`);
+  zone.innerHTML = isEmpty ? `
+    <span class="zone-label">${escapeHtml(plant.zoneLabel)}</span>
+    <span class="zone-invite">Ready to plant</span>
+  ` : `
+    <span class="zone-label">${escapeHtml(plant.zoneLabel)}</span>
+    <strong>${escapeHtml(plant.name)}</strong>
+    <span>${escapeHtml(waterInfo.label)} · ${escapeHtml(plant.status)}</span>
+    <small>${escapeHtml(plant.notes || 'Tap for notes & care')}</small>
+  `;
+  zone.addEventListener('click', () => startEdit(sectionId, plant.id));
+  return zone;
+}
+
+function addEmptyZone(sectionId) {
+  const index = appState.sections[sectionId].length;
+  const defaults = getDefaultZone(index);
+  const emptyZone = normalizePlant({
+    id: createPlantId(),
+    sectionId,
+    zoneLabel: `Zone ${index + 1}`,
+    zoneX: defaults.x,
+    zoneY: defaults.y,
+    zoneWidth: defaults.width,
+    zoneHeight: defaults.height,
+    status: 'watch',
+    plantType: 'other',
+    sunlight: 'unknown',
+    wateringFrequency: 'unknown'
+  }, index);
+
+  appState.sections[sectionId].push(emptyZone);
+  saveState(appState);
+  renderGarden();
+  startEdit(sectionId, emptyZone.id);
+}
+
+async function handleBedPhotoUpload(sectionId, event) {
+  const [file] = event.target.files || [];
+  if (!file) return;
+
+  try {
+    appState.beds[sectionId].backgroundImage = await readImageAsResizedDataUrl(file);
+    saveState(appState);
+    renderGarden();
+  } catch (error) {
+    alert(error.message || 'That photo could not be saved in this browser. Try a smaller image.');
+  }
+}
+
+function removeBedPhoto(sectionId) {
+  appState.beds[sectionId].backgroundImage = '';
+  saveState(appState);
+  renderGarden();
+}
+
 function createSpotCard(sectionId, plant) {
   const card = document.createElement('div');
-  card.className = 'spot-card';
+  card.className = plant.name ? 'spot-card' : 'spot-card empty-zone-card';
 
-  const ageText = plant.plantingDate ? `${getDaysSince(plant.plantingDate)} day(s) old` : 'No planting date';
-  const waterInfo = getWateringStatus(plant);
-  const daysSinceWatered = getDaysSince(plant.lastWatered);
+  if (!plant.name) {
+    card.innerHTML = `
+      <h4>${escapeHtml(plant.zoneLabel)}</h4>
+      <p>This mapped patch is waiting for something lovely.</p>
+      <p><strong>Position:</strong> ${plant.zoneX}% / ${plant.zoneY}% · ${plant.zoneWidth}% × ${plant.zoneHeight}%</p>
+    `;
+  } else {
+    const ageText = plant.plantingDate ? `${getDaysSince(plant.plantingDate)} day(s) old` : 'No planting date';
+    const waterInfo = getWateringStatus(plant);
+    const daysSinceWatered = getDaysSince(plant.lastWatered);
 
-  card.innerHTML = `
-    <h4>${escapeHtml(plant.name || 'Unnamed Plant')}</h4>
-    <p><strong>Status:</strong> ${plant.status}</p>
-    <p><strong>Planted:</strong> ${formatDate(plant.plantingDate) || '—'} (${ageText})</p>
-    <p><strong>Watered:</strong> ${formatDate(plant.lastWatered) || 'Not set'}${Number.isFinite(daysSinceWatered) ? ` (${daysSinceWatered} day(s) ago)` : ''}</p>
-    <p><strong>Watering due:</strong> <span class="${waterInfo.className}">${waterInfo.label}</span></p>
-    <p><strong>Quick note:</strong> ${escapeHtml(plant.notes || 'No note yet.')}</p>
-    ${renderCareProfileForCard(plant.careProfile)}
-  `;
+    card.innerHTML = `
+      <h4>${escapeHtml(plant.name)} <span>${escapeHtml(plant.zoneLabel)}</span></h4>
+      <p><strong>Health:</strong> ${escapeHtml(plant.status)}</p>
+      <p><strong>Planted:</strong> ${formatDate(plant.plantingDate) || '—'} (${ageText})</p>
+      <p><strong>Watered:</strong> ${formatDate(plant.lastWatered) || 'Not set'}${Number.isFinite(daysSinceWatered) ? ` (${daysSinceWatered} day(s) ago)` : ''}</p>
+      <p><strong>Watering:</strong> <span class="${waterInfo.className}">${waterInfo.label}</span></p>
+      <p><strong>Quick notes:</strong> ${escapeHtml(plant.notes || 'No note yet.')}</p>
+      ${renderCareProfileForCard(plant.careProfile)}
+    `;
+  }
 
   const actions = document.createElement('div');
   actions.className = 'spot-actions';
 
-  actions.appendChild(makeButton('Mark watered today', 'btn-primary', () => markWateredToday(sectionId, plant.id)));
-  actions.appendChild(makeButton('Edit', 'btn-secondary', () => startEdit(sectionId, plant.id)));
+  if (plant.name) {
+    actions.appendChild(makeButton('Watered today', 'btn-primary', () => markWateredToday(sectionId, plant.id)));
+  } else {
+    actions.appendChild(makeButton('Plant here', 'btn-primary', () => startEdit(sectionId, plant.id)));
+  }
+  actions.appendChild(makeButton('Edit zone', 'btn-secondary', () => startEdit(sectionId, plant.id)));
   actions.appendChild(makeButton('Remove', 'btn-danger', () => removePlant(sectionId, plant.id)));
 
   card.appendChild(actions);
@@ -619,6 +802,53 @@ function getNextSeasonStart(seasonName, year) {
   return new Date(year + 1, 2, 20);
 }
 
+
+function getDefaultZone(index) {
+  const columns = 3;
+  const row = Math.floor(index / columns);
+  const col = index % columns;
+  return {
+    x: 6 + col * 31,
+    y: 8 + (row % 3) * 29,
+    width: 26,
+    height: 22
+  };
+}
+
+function clampPercent(value, fallback, min = 0, max = 100) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(number)));
+}
+
+function readImageAsResizedDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Please choose an image file.'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('The photo could not be read.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('The photo could not be prepared.'));
+      img.onload = () => {
+        const maxSize = 1400;
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function getDaysSince(dateString) {
   if (!dateString) return NaN;
   const target = new Date(`${dateString}T00:00:00`);
@@ -642,7 +872,7 @@ function asEnum(value, allowed, fallback) {
 }
 
 function setValue(id, value) {
-  document.getElementById(id).value = value || '';
+  document.getElementById(id).value = value ?? '';
 }
 
 function makeButton(label, className, onClick) {
@@ -655,7 +885,7 @@ function makeButton(label, className, onClick) {
 }
 
 function sectionLabel(sectionId) {
-  return sectionId === 'sectionB' ? 'Section B' : 'Section A';
+  return sectionId === 'sectionB' ? 'Raised Bed B' : 'Raised Bed A';
 }
 
 function capitalize(text) {
@@ -670,7 +900,7 @@ function getTodayISO() {
 }
 
 function escapeHtml(text) {
-  return text
+  return String(text ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
