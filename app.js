@@ -115,6 +115,7 @@ const seasonTip = document.getElementById('seasonTip');
 const seasonChange = document.getElementById('seasonChange');
 const categoryTips = document.getElementById('categoryTips');
 const sectionsWrap = document.getElementById('sectionsWrap');
+const dailySummary = document.getElementById('dailySummary');
 const plantForm = document.getElementById('plantForm');
 const editorTitle = document.getElementById('editorTitle');
 const editorDetails = document.getElementById('editorDetails');
@@ -144,6 +145,7 @@ document.addEventListener('keydown', (event) => {
 
 renderSeasonPanel();
 renderGarden();
+renderDailySummary();
 resetForm();
 
 function loadState() {
@@ -300,6 +302,7 @@ function handleSavePlant(event) {
   else addPlant(plant);
   saveState(appState);
   renderGarden();
+  renderDailySummary();
   openPlantSheet(plant.sectionId, plant.id);
   resetForm();
 }
@@ -344,6 +347,7 @@ function removePlant(sectionId, plantId) {
   appState.sections[sectionId] = appState.sections[sectionId].filter((plant) => plant.id !== plantId);
   saveState(appState);
   renderGarden();
+  renderDailySummary();
   closePlantSheet();
   if (editingPlantId === plantId) resetForm();
 }
@@ -354,6 +358,7 @@ function markWateredToday(sectionId, plantId) {
   plant.lastWatered = getTodayISO();
   saveState(appState);
   renderGarden();
+  renderDailySummary();
   openPlantSheet(sectionId, plantId);
   if (editingPlantId === plantId) setValue('lastWatered', plant.lastWatered);
 }
@@ -366,6 +371,7 @@ function addNote(sectionId, plantId) {
   plant.notes = note.trim();
   saveState(appState);
   renderGarden();
+  renderDailySummary();
   openPlantSheet(sectionId, plantId);
 }
 
@@ -464,6 +470,7 @@ function createBedMap(section) {
   appState.sections[section.id].forEach((plant) => {
     map.appendChild(createPlantMarker(section.id, plant));
   });
+  map.addEventListener('click', (event) => handleBedTap(event, section.id, map));
   return map;
 }
 
@@ -476,11 +483,12 @@ function createPlantMarker(sectionId, plant) {
   marker.style.top = `${plant.zoneY}%`;
   marker.setAttribute('aria-label', `Open ${plant.name || 'plant'} details`);
   marker.innerHTML = `
-    <span class="plant-icon" aria-hidden="true">${escapeHtml(plant.icon || getPlantIcon(plant.name, plant.plantType))}</span>
+    <span class="plant-icon" aria-hidden="true">${escapeHtml(getPlantArt(plant))}</span>
     <span class="plant-name">${escapeHtml(plant.name || 'New plant')}</span>
-    <span class="plant-water ${waterInfo.className}">${escapeHtml(waterInfo.label)}</span>
+    <span class="plant-water ${waterInfo.className}">${escapeHtml(getGrowthStageLabel(plant))}</span>
   `;
-  marker.addEventListener('click', () => openPlantSheet(sectionId, plant.id));
+  marker.dataset.plantId = plant.id;
+  marker.addEventListener('click', (e) => { e.stopPropagation(); openPlantSheet(sectionId, plant.id); highlightSelection(plant.id);});
   return marker;
 }
 
@@ -491,20 +499,20 @@ function openPlantSheet(sectionId, plantId) {
   const waterInfo = getWateringStatus(plant);
   plantSheetContent.innerHTML = `
     <p class="sheet-kicker">${escapeHtml(sectionLabel(sectionId))}</p>
-    <h2>${escapeHtml(plant.icon || getPlantIcon(plant.name, plant.plantType))} ${escapeHtml(plant.name)}</h2>
+    <p class='sheet-kicker'>A cozy check-in</p><h2><span class='plant-art'>${escapeHtml(getPlantArt(plant))}</span> ${escapeHtml(plant.name)}</h2>
     <div class="sheet-info">
-      <p><strong>Water status</strong><span class="${waterInfo.className}">${escapeHtml(waterInfo.label)}</span></p>
-      <p><strong>Last watered</strong><span>${escapeHtml(formatDate(plant.lastWatered) || 'Not recorded yet')}</span></p>
-      <p><strong>Care tips</strong><span>${escapeHtml(getCareSummary(plant))}</span></p>
+      <p><strong>What it likes</strong><span>${escapeHtml(getCareSummary(plant))}</span></p>
+      <p><strong>Watch for</strong><span>${escapeHtml(getWatchFor(plant))}</span></p>
+      <p><strong>Water status</strong><span class="${waterInfo.className}">${escapeHtml(waterInfo.label)} · ${escapeHtml(formatDate(plant.lastWatered) || 'Not watered yet')}</span></p>
       <p><strong>Notes</strong><span>${escapeHtml(plant.notes || 'No note yet.')}</span></p>
     </div>
-    ${renderCareTasks(plant.careProfile)}
+    <p><strong>Helpful tasks</strong></p>${renderCareTasks(plant.careProfile)}
     <div class="sheet-actions" id="sheetActions"></div>
   `;
   const actions = plantSheetContent.querySelector('#sheetActions');
   actions.appendChild(makeButton('Watered Today', 'btn-primary', () => markWateredToday(sectionId, plant.id)));
   actions.appendChild(makeButton('Add Note', 'btn-secondary', () => addNote(sectionId, plant.id)));
-  actions.appendChild(makeButton('Edit', 'btn-secondary', () => startEdit(sectionId, plant.id)));
+  actions.appendChild(makeButton('Edit Name', 'btn-secondary', () => startEdit(sectionId, plant.id)));
   actions.appendChild(makeButton('Remove', 'btn-danger quiet-danger', () => removePlant(sectionId, plant.id)));
   plantSheet.hidden = false;
   sheetBackdrop.hidden = false;
@@ -526,17 +534,17 @@ async function handlePlantLookup() {
     return;
   }
   lookupBtn.disabled = true;
-  lookupStatus.textContent = 'Finding local care tips...';
+  lookupStatus.textContent = 'Looking up your plant...';
   lookupStatus.className = 'lookup-status';
   try {
     const result = await plantLookupProvider.lookupCareProfile(query);
     applyLookupResult(result);
-    lookupStatus.textContent = `Care tips ready for ${result.commonName}.`;
+    lookupStatus.textContent = `I found a likely match: ${result.commonName}.`; 
     lookupStatus.className = 'lookup-status status-thriving';
   } catch (error) {
     setValue('careProfile', '');
     showLookupPreview(null);
-    lookupStatus.textContent = error.message || 'No local care tips matched that plant yet.';
+    lookupStatus.textContent = 'I could not find a close match yet. Try a simple name like Roma tomato.';
     lookupStatus.className = 'lookup-status status-struggling';
   } finally {
     lookupBtn.disabled = false;
@@ -551,6 +559,7 @@ function applyLookupResult(result) {
   setValue('notes', result.careNotes);
   setValue('careProfile', JSON.stringify(result));
   showLookupPreview(result);
+  saveBtn.textContent = 'Save to Garden';
 }
 
 function readCareProfileFromForm(formData) {
@@ -785,3 +794,45 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 }
+
+
+function handleBedTap(event, sectionId, map) {
+  if (event.target.closest('.plant-marker')) return;
+  const rect = map.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+  map.style.setProperty('--tap-x', `${x}%`);
+  map.style.setProperty('--tap-y', `${y}%`);
+  map.style.setProperty('--tap-visible', '1');
+  setTimeout(() => map.style.setProperty('--tap-visible', '0'), 250);
+  const plants = appState.sections[sectionId] || [];
+  let nearest = null;
+  let best = 9;
+  plants.forEach((p)=>{const d=Math.hypot(p.zoneX-x,p.zoneY-y); if (d<best){best=d; nearest=p;}});
+  if (nearest) { openPlantSheet(sectionId, nearest.id); highlightSelection(nearest.id); return; }
+  showEmptyPlacement(map, x, y);
+  openAddAt(sectionId, x, y);
+}
+function openAddAt(sectionId, x, y){
+  openAddPlantForm();
+  setValue('sectionId', sectionId);
+  setValue('zoneLabel','Garden spot');
+  setValue('zoneX', Math.round(x));
+  setValue('zoneY', Math.round(y));
+  setValue('zoneWidth',18);setValue('zoneHeight',18);
+  lookupInput.focus();
+  lookupStatus.textContent='What did the plant tag say?';
+}
+function showEmptyPlacement(map,x,y){const d=document.createElement('div');d.className='empty-placement';d.style.left=`${x}%`;d.style.top=`${y}%`;map.appendChild(d);setTimeout(()=>d.remove(),900);}
+function highlightSelection(plantId){document.querySelectorAll('.plant-marker').forEach((n)=>n.classList.toggle('is-selected',n.dataset.plantId===plantId));}
+function getPlantArt(plant){ return plant.icon || getPlantIcon(plant.name, plant.plantType);}
+function getWatchFor(plant){ if (plant.plantType==='flower') return 'Faded blooms and thirsty soil.'; if (plant.name.toLowerCase().includes('tomato')) return 'Droopy leaves in heat and crowded vines.'; return 'Dry soil and changes in leaf color.';}
+function renderDailySummary(){
+  const lines=[];
+  for (const section of SECTIONS){for (const plant of appState.sections[section.id]){const w=getWateringStatus(plant); if (w.label==='Water today') lines.push(`${plant.name} may need water today.`); if (plant.name.toLowerCase().includes('marigold')) lines.push('Marigolds are blooming happily.'); if (plant.name.toLowerCase().includes('cucumber')) lines.push('Check cucumber vines for fresh new growth.');}}
+  if (!lines.length) lines.push('Everything looks calm today — take a happy peek at your beds.');
+  lines.push('Warm days can dry raised beds faster this week.');
+  dailySummary.innerHTML = `<h3>Today in Nana\'s Garden</h3><ul>${[...new Set(lines)].slice(0,4).map(l=>`<li>${escapeHtml(l)}</li>`).join('')}</ul>`;
+}
+
+function getGrowthStageLabel(plant){const d=getDaysSince(plant.plantingDate);if(!Number.isFinite(d)||d<14)return "seedling";if(d<35)return "growing";if((plant.plantType==="flower"&&d>=35)||d<60)return "flowering";if(d<85)return "fruiting";return "harvest-ready";}
