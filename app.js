@@ -31,6 +31,16 @@ const SPOT_PRESETS = {
   'lower-right': { label: 'Lower right', x: 74, y: 76 }
 };
 
+const PLANT_ASSETS = {
+  'bush-early-girl-tomato': 'assets/plants/bush-early-girl-tomato.png',
+  'roma-tomato':            'assets/plants/roma-tomato.png',
+  'sweet-million-tomato':   'assets/plants/sweet-million-tomato.png',
+  'sun-sugar-tomato':       'assets/plants/sun-sugar-tomato.png',
+  'jalapeno-pepper':        'assets/plants/jalapeno-pepper.png',
+  'slicing-cucumber':       'assets/plants/slicing-cucumber.png',
+  'marigold':               'assets/plants/marigold.png'
+};
+
 const MOCK_PLANT_PROFILES = [
   makeMockProfile({
     lookupKey: 'bush early girl tomato',
@@ -474,21 +484,77 @@ function createBedMap(section) {
   return map;
 }
 
+function getPlantSpriteKey(plant) {
+  const name = (plant.name || '').toLowerCase();
+  if (name.includes('yellow') || name.includes('sun sugar')) return 'yellow-tomato';
+  if (name.includes('tomato')) return 'tomato';
+  if (name.includes('cucumber')) return 'cucumber';
+  if (name.includes('jalape') || name.includes('pepper')) return 'jalapeno';
+  if (name.includes('marigold')) return 'marigold';
+  if (plant.plantType === 'flower') return 'marigold';
+  return 'generic';
+}
+
+function getPlantAssetKey(plant) {
+  const name = (plant.name || '').toLowerCase();
+  if (name.includes('bush early girl') || name.includes('early girl')) return 'bush-early-girl-tomato';
+  if (name.includes('roma')) return 'roma-tomato';
+  if (name.includes('sweet million')) return 'sweet-million-tomato';
+  if (name.includes('sun sugar') || name.includes('yellow cherry')) return 'sun-sugar-tomato';
+  if (name.includes('jalape') || name.includes('pepper')) return 'jalapeno-pepper';
+  if (name.includes('cucumber')) return 'slicing-cucumber';
+  if (name.includes('marigold')) return 'marigold';
+  return null;
+}
+
+function getPlantSizeClass(assetKey) {
+  if (assetKey === 'slicing-cucumber') return 'wide';
+  if (assetKey === 'marigold') return 'compact';
+  return 'large';
+}
+
+function createPlantSpriteElement(spriteKey, assetKey) {
+  const wrapper = document.createElement('span');
+  wrapper.className = `plant-sprite plant-sprite-${spriteKey}`;
+  wrapper.setAttribute('aria-hidden', 'true');
+
+  const assetPath = assetKey ? PLANT_ASSETS[assetKey] : null;
+  if (assetPath) {
+    const sizeClass = getPlantSizeClass(assetKey);
+    wrapper.classList.add('plant-sprite-has-asset', `plant-sprite-size-${sizeClass}`);
+    const img = document.createElement('img');
+    img.src = assetPath;
+    img.alt = '';
+    img.className = 'plant-asset-img';
+    img.addEventListener('error', () => {
+      img.remove();
+      wrapper.classList.remove('plant-sprite-has-asset', `plant-sprite-size-${sizeClass}`);
+    }, { once: true });
+    wrapper.appendChild(img);
+  }
+
+  return wrapper;
+}
+
 function createPlantMarker(sectionId, plant) {
   const marker = document.createElement('button');
-  const waterInfo = getWateringStatus(plant);
   marker.type = 'button';
   marker.className = `plant-marker plant-${plant.plantType}`;
   marker.style.left = `${plant.zoneX}%`;
   marker.style.top = `${plant.zoneY}%`;
   marker.setAttribute('aria-label', `Open ${plant.name || 'plant'} details`);
-  marker.innerHTML = `
-    <span class="plant-icon" aria-hidden="true">${escapeHtml(getPlantArt(plant))}</span>
-    <span class="plant-name">${escapeHtml(plant.name || 'New plant')}</span>
-    <span class="plant-water ${waterInfo.className}">${escapeHtml(getGrowthStageLabel(plant))}</span>
-  `;
   marker.dataset.plantId = plant.id;
-  marker.addEventListener('click', (e) => { e.stopPropagation(); openPlantSheet(sectionId, plant.id); highlightSelection(plant.id);});
+
+  const spriteKey = getPlantSpriteKey(plant);
+  const assetKey = getPlantAssetKey(plant);
+  marker.appendChild(createPlantSpriteElement(spriteKey, assetKey));
+
+  const label = document.createElement('span');
+  label.className = 'plant-label';
+  label.textContent = plant.name || 'New plant';
+  marker.appendChild(label);
+
+  marker.addEventListener('click', (e) => { e.stopPropagation(); openPlantSheet(sectionId, plant.id); highlightSelection(plant.id); });
   return marker;
 }
 

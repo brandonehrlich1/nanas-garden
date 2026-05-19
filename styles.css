@@ -115,11 +115,11 @@ h2, h3, h4 { margin-top: 0; }
   overflow: hidden;
   border: clamp(12px, 3vw, 22px) solid #9a6538;
   border-radius: 28px;
-  background:
+  background-color: var(--soil);
+  background-image:
     linear-gradient(90deg, rgba(81, 45, 22, 0.16), transparent 22%, rgba(255,255,255,0.07) 50%, transparent 78%, rgba(58, 34, 18, 0.14)),
     repeating-linear-gradient(7deg, rgba(255, 245, 212, 0.07) 0 2px, transparent 2px 20px),
-    repeating-linear-gradient(99deg, rgba(57, 32, 17, 0.16) 0 10px, transparent 10px 28px),
-    var(--soil);
+    repeating-linear-gradient(99deg, rgba(57, 32, 17, 0.16) 0 10px, transparent 10px 28px);
   box-shadow:
     inset 0 0 0 4px rgba(255, 238, 194, 0.24),
     inset 0 0 44px rgba(36, 18, 8, 0.35),
@@ -163,34 +163,276 @@ h2, h3, h4 { margin-top: 0; }
   position: absolute;
   z-index: 2;
   transform: translate(-50%, -50%);
-  width: clamp(6.8rem, 31vw, 10.5rem);
-  min-height: 5.9rem;
-  border: 3px solid rgba(255, 250, 230, 0.95);
-  border-radius: 24px;
-  padding: 0.5rem;
-  display: grid;
-  place-items: center;
-  gap: 0.1rem;
-  text-align: center;
-  color: #fffdf5;
-  background: rgba(47, 100, 43, 0.86);
-  box-shadow: 0 10px 24px rgba(26, 42, 22, 0.28);
+  min-width: 5rem;
+  min-height: 5rem;
+  border: none;
+  background: transparent;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  cursor: pointer;
   touch-action: manipulation;
 }
 
-.plant-flower { background: rgba(174, 101, 45, 0.88); }
-.plant-herb { background: rgba(68, 125, 63, 0.88); }
-.plant-other { background: rgba(88, 112, 67, 0.88); }
-
-.plant-marker:hover,
-.plant-marker:focus-visible {
-  transform: translate(-50%, -52%);
-  outline: 4px solid rgba(246, 216, 137, 0.92);
+.plant-marker:hover .plant-sprite,
+.plant-marker:focus-visible .plant-sprite {
+  transform: translateY(-3px) scale(1.1);
 }
 
-.plant-icon { font-size: clamp(1.55rem, 7vw, 2.35rem); line-height: 1; }
-.plant-name { font-weight: 900; font-size: clamp(0.88rem, 3.5vw, 1.08rem); line-height: 1.08; }
-.plant-water { font-size: 0.82rem; background: rgba(255,255,255,0.92); border-radius: 999px; padding: 0.1rem 0.45rem; }
+.plant-marker:focus-visible {
+  outline: 3px solid rgba(246, 216, 137, 0.9);
+  border-radius: 50%;
+}
+
+/* --- Organic plant sprites --- */
+
+.plant-sprite {
+  display: block;
+  position: relative;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* Tomato plant (red fruits) */
+.plant-sprite-tomato {
+  width: clamp(2.8rem, 13vw, 3.6rem);
+  height: clamp(2.8rem, 13vw, 3.6rem);
+  background: radial-gradient(ellipse at 45% 60%, #3a9636 0%, #266e23 58%, #1a4e19 100%);
+  border-radius: 46% 54% 48% 52% / 52% 46% 54% 48%;
+}
+.plant-sprite-tomato::before {
+  content: "";
+  position: absolute;
+  width: 55%;
+  height: 50%;
+  top: -18%;
+  left: 22%;
+  background: radial-gradient(ellipse, #4aaa46 0%, #2e8228 100%);
+  border-radius: 50% 44% 56% 48% / 60% 48% 52% 40%;
+}
+.plant-sprite-tomato::after {
+  content: "";
+  position: absolute;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #dc2020;
+  top: 42%;
+  left: 16%;
+  box-shadow:
+    1.1rem -0.5rem 0 0 #c81c1c,
+    1.8rem 0rem 0 0 #dc2020,
+    0.4rem 0.85rem 0 0 #cc1a1a,
+    1.5rem 0.8rem 0 0 #dc2020;
+}
+
+/* Yellow cherry tomato */
+.plant-sprite-yellow-tomato {
+  width: clamp(2.8rem, 13vw, 3.6rem);
+  height: clamp(2.8rem, 13vw, 3.6rem);
+  background: radial-gradient(ellipse at 45% 60%, #3a9636 0%, #266e23 58%, #1a4e19 100%);
+  border-radius: 50% 48% 52% 46% / 48% 52% 46% 54%;
+}
+.plant-sprite-yellow-tomato::before {
+  content: "";
+  position: absolute;
+  width: 55%;
+  height: 50%;
+  top: -18%;
+  left: 22%;
+  background: radial-gradient(ellipse, #4aaa46 0%, #2e8228 100%);
+  border-radius: 50% 44% 56% 48% / 60% 48% 52% 40%;
+}
+.plant-sprite-yellow-tomato::after {
+  content: "";
+  position: absolute;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: #e8c000;
+  top: 42%;
+  left: 16%;
+  box-shadow:
+    1.1rem -0.45rem 0 0 #ddb800,
+    1.8rem 0rem 0 0 #e8c000,
+    0.4rem 0.85rem 0 0 #d4ae00,
+    1.5rem 0.75rem 0 0 #f0cc20;
+}
+
+/* Slicing cucumber (wider, vine-like) */
+.plant-sprite-cucumber {
+  width: clamp(3.2rem, 15vw, 4.2rem);
+  height: clamp(2.5rem, 11vw, 3.2rem);
+  background: radial-gradient(ellipse at 50% 55%, #44a63e 0%, #2e7828 60%, #1c5418 100%);
+  border-radius: 42% 58% 48% 52% / 56% 44% 56% 44%;
+}
+.plant-sprite-cucumber::before {
+  content: "";
+  position: absolute;
+  width: 65%;
+  height: 38%;
+  bottom: -6%;
+  left: 8%;
+  background: radial-gradient(ellipse, #3a9234 0%, #1e5e1a 100%);
+  border-radius: 30% 70% 60% 40% / 40% 60% 40% 60%;
+  opacity: 0.7;
+}
+.plant-sprite-cucumber::after {
+  content: "";
+  position: absolute;
+  width: 1.0rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: #58b84a;
+  top: 44%;
+  left: 14%;
+  transform: rotate(-12deg);
+  box-shadow:
+    1.5rem 0.2rem 0 0.06rem #4caa3e,
+    0.6rem 0.65rem 0 0.06rem #58b84a;
+}
+
+/* Jalapeño (compact pepper bush) */
+.plant-sprite-jalapeno {
+  width: clamp(2.6rem, 12vw, 3.3rem);
+  height: clamp(2.8rem, 13vw, 3.5rem);
+  background: radial-gradient(ellipse at 50% 58%, #2a8228 0%, #1c6420 55%, #124414 100%);
+  border-radius: 54% 46% 50% 50% / 46% 54% 46% 54%;
+}
+.plant-sprite-jalapeno::before {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: -14%;
+  left: 25%;
+  background: radial-gradient(ellipse, #349830 0%, #1e6e1c 100%);
+  border-radius: 50% 48% 52% 46% / 56% 44% 56% 44%;
+}
+.plant-sprite-jalapeno::after {
+  content: "";
+  position: absolute;
+  width: 0.3rem;
+  height: 0.6rem;
+  border-radius: 50% 50% 60% 40% / 28% 28% 72% 72%;
+  background: #52aa44;
+  top: 28%;
+  left: 26%;
+  box-shadow:
+    0.88rem 0.1rem 0 0 #48a038,
+    0.18rem 0.88rem 0 0 #52aa44,
+    1.2rem 0.65rem 0 0 #48a038;
+}
+
+/* Marigold (flower cluster) */
+.plant-sprite-marigold {
+  width: clamp(2.8rem, 13vw, 3.5rem);
+  height: clamp(2.6rem, 12vw, 3.3rem);
+  background: radial-gradient(ellipse at 50% 65%, #369230 0%, #226e1e 55%, #164a12 100%);
+  border-radius: 48% 52% 50% 50% / 54% 46% 54% 46%;
+}
+.plant-sprite-marigold::before {
+  content: "";
+  position: absolute;
+  width: 1.0rem;
+  height: 1.0rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #ffe038 35%, #f07800 100%);
+  top: -14%;
+  left: 16%;
+  box-shadow:
+    1.2rem 0rem 0 0 #e89000,
+    0.1rem 0.15rem 0 -2px #ffd428,
+    1.45rem 0.4rem 0 -1px #f09000;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+.plant-sprite-marigold::after {
+  content: "";
+  position: absolute;
+  width: 0.82rem;
+  height: 0.82rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #ffbe20 35%, #e07800 100%);
+  top: 24%;
+  left: 42%;
+  box-shadow:
+    -1.05rem 0.1rem 0 0 #ffd030,
+    0.3rem 0.7rem 0 -1px #e09020;
+}
+
+/* Generic / fallback */
+.plant-sprite-generic {
+  width: clamp(2.6rem, 12vw, 3.2rem);
+  height: clamp(2.8rem, 13vw, 3.4rem);
+  background: radial-gradient(ellipse at 50% 55%, #44aa3e 0%, #2a7825 55%, #1c5218 100%);
+  border-radius: 50% 48% 52% 46% / 48% 52% 48% 52%;
+}
+.plant-sprite-generic::before {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 45%;
+  top: -14%;
+  left: 25%;
+  background: radial-gradient(ellipse, #52be4c 0%, #2a7825 100%);
+  border-radius: 50%;
+}
+
+/* Plant label — soft text tag below the sprite */
+.plant-label {
+  display: block;
+  max-width: 5.5rem;
+  font-size: clamp(0.66rem, 2.6vw, 0.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  word-break: break-word;
+  color: rgba(255, 248, 225, 0.97);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 10px rgba(0, 0, 0, 0.45);
+  background: rgba(20, 12, 4, 0.44);
+  border-radius: 999px;
+  padding: 0.1rem 0.42rem;
+}
+
+/* --- PNG botanical asset rendering --- */
+
+/* When a real PNG is loaded: suppress CSS blob, show image */
+.plant-sprite-has-asset {
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+.plant-sprite-has-asset::before,
+.plant-sprite-has-asset::after {
+  display: none !important;
+}
+
+/* Size variants for botanical PNGs */
+.plant-sprite-size-large {
+  width: clamp(3.8rem, 18vw, 5.2rem);
+  height: clamp(3.8rem, 18vw, 5.2rem);
+}
+.plant-sprite-size-wide {
+  width: clamp(4.4rem, 20vw, 5.8rem);
+  height: clamp(3.2rem, 15vw, 4.4rem);
+}
+.plant-sprite-size-compact {
+  width: clamp(2.8rem, 13vw, 3.8rem);
+  height: clamp(2.8rem, 13vw, 3.8rem);
+}
+
+/* The PNG image itself */
+.plant-asset-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* bottom-anchor so roots sit at soil level */
+  object-position: center 90%;
+  filter: drop-shadow(0 3px 7px rgba(25, 12, 4, 0.38));
+}
 
 form { display: grid; gap: 0.55rem; padding-top: 0.8rem; }
 summary { cursor: pointer; font-size: 1.25rem; font-weight: 900; }
@@ -358,8 +600,7 @@ button:disabled { cursor: wait; opacity: 0.7; }
 .bed-map{cursor:pointer;position:relative}
 .bed-map::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--tap-x,50%) var(--tap-y,50%), rgba(255,241,200,.35), transparent 24%);opacity:var(--tap-visible,0);transition:opacity .35s ease;pointer-events:none}
 .empty-placement{position:absolute;transform:translate(-50%,-50%);width:2.6rem;height:2.6rem;border-radius:999px;border:2px dashed rgba(255,247,220,.9);background:rgba(255,255,255,.2);box-shadow:0 0 0 6px rgba(255,255,255,.12)}
-.plant-marker{width:clamp(6.3rem,28vw,9.6rem);transition:transform .2s ease, box-shadow .2s ease}
-.plant-marker.is-selected{transform:translate(-50%,-56%) scale(1.05);box-shadow:0 0 0 5px rgba(246,216,137,.5),0 12px 24px rgba(26,42,22,.35)}
+.plant-marker.is-selected .plant-sprite{transform:translateY(-5px) scale(1.14);filter:drop-shadow(0 0 7px rgba(246,216,137,.9))}
 .plant-art{font-size:2rem;line-height:1}
 .lookup-panel{background:#fff9f0}
 @media (max-width:640px){button,.btn-secondary{padding:.9rem 1rem}.card{padding:1.1rem}.plant-sheet{padding:1rem}}
