@@ -3,121 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nana's Garden Tracker</title>
+  <title>Nana's Virtual Garden</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="top-header">
-    <h1>Nana's Garden Tracker</h1>
-    <p>A cozy, local-first map of Nana's real raised beds. Add a photo, mark gentle growing zones, and tap each patch to tend it.</p>
+    <p class="eyebrow">🌼 Nana's Garden</p>
+    <h1>Virtual Garden</h1>
+    <p>Tap a plant to see watering, notes, and gentle care reminders.</p>
   </header>
 
   <main class="app-shell">
-    <section class="season-panel card">
-      <h2>Season & Helpful Tips</h2>
-      <p class="season-pill" id="seasonPill"></p>
-      <p id="seasonTip"></p>
-      <p id="seasonChange"></p>
-      <ul id="categoryTips" class="tips-list"></ul>
-      <p class="disclaimer">Suggestions are general; adjust for the actual plant tag, weather, and pot conditions.</p>
-    </section>
-
-    <section class="garden-panel card">
+    <section class="garden-panel card" aria-labelledby="gardenTitle">
       <div class="panel-head">
-        <h2>Garden Beds</h2>
+        <div>
+          <h2 id="gardenTitle">Today in the Garden</h2>
+          <p>Two cozy raised beds, already planted just like Nana's garden.</p>
+        </div>
+        <button type="button" class="btn-secondary small-action" id="showAddPlantBtn">+ Add Plant</button>
       </div>
       <div id="sectionsWrap" class="sections-wrap"></div>
     </section>
 
-    <section class="editor-panel card">
-      <h2 id="editorTitle">Plant a Growing Zone</h2>
-      <form id="plantForm" autocomplete="off">
-        <input type="hidden" id="plantId" name="plantId" />
-        <input type="hidden" id="careProfile" name="careProfile" />
+    <section class="season-panel card">
+      <h2>Helpful Tips</h2>
+      <p class="season-pill" id="seasonPill"></p>
+      <p id="seasonTip"></p>
+      <p id="seasonChange"></p>
+      <ul id="categoryTips" class="tips-list"></ul>
+      <p class="disclaimer">Suggestions are general; adjust for the actual plant tag, weather, and soil feel.</p>
+    </section>
 
-        <fieldset class="zone-fieldset">
-          <legend>Growing Zone</legend>
-          <p class="field-help">Place this plant on the bed photo using simple percentages. You can fine-tune it anytime.</p>
+    <section class="editor-panel card" id="editorPanel">
+      <details id="editorDetails">
+        <summary><span id="editorTitle">Add or Edit a Plant</span></summary>
+        <form id="plantForm" autocomplete="off">
+          <input type="hidden" id="plantId" name="plantId" />
+          <input type="hidden" id="careProfile" name="careProfile" />
+          <input type="hidden" id="zoneLabel" name="zoneLabel" />
+          <input type="hidden" id="zoneX" name="zoneX" />
+          <input type="hidden" id="zoneY" name="zoneY" />
+          <input type="hidden" id="zoneWidth" name="zoneWidth" />
+          <input type="hidden" id="zoneHeight" name="zoneHeight" />
 
-          <label for="sectionId">Garden Bed</label>
+          <label for="sectionId">Bed</label>
           <select id="sectionId" name="sectionId">
-            <option value="sectionA">Section A</option>
-            <option value="sectionB">Section B</option>
+            <option value="sectionA">Upper Bed</option>
+            <option value="sectionB">Lower Bed</option>
           </select>
 
-          <label for="zoneLabel">Zone Label</label>
-          <input id="zoneLabel" name="zoneLabel" type="text" placeholder="Example: front-left tomato corner" />
+          <label for="spotPreset">Spot in the bed</label>
+          <select id="spotPreset" name="spotPreset">
+            <option value="upper-left">Upper left</option>
+            <option value="upper-middle">Upper middle</option>
+            <option value="upper-right">Upper right</option>
+            <option value="middle-left">Middle left</option>
+            <option value="center">Center</option>
+            <option value="middle-right">Middle right</option>
+            <option value="lower-left">Lower left</option>
+            <option value="lower-middle">Lower middle</option>
+            <option value="lower-right">Lower right</option>
+          </select>
 
-          <div class="zone-grid-inputs">
-            <label for="zoneX">X %<input id="zoneX" name="zoneX" type="number" min="0" max="100" step="1" /></label>
-            <label for="zoneY">Y %<input id="zoneY" name="zoneY" type="number" min="0" max="100" step="1" /></label>
-            <label for="zoneWidth">Width %<input id="zoneWidth" name="zoneWidth" type="number" min="8" max="100" step="1" /></label>
-            <label for="zoneHeight">Height %<input id="zoneHeight" name="zoneHeight" type="number" min="8" max="100" step="1" /></label>
+          <div class="lookup-panel" aria-live="polite">
+            <label for="lookupInput">Care lookup</label>
+            <p class="lookup-help">Optional: choose local care tips for tomatoes, cucumber, jalapeño, or marigolds.</p>
+            <div class="lookup-row">
+              <input id="lookupInput" type="text" placeholder="Example: Bush Early Girl Tomato" />
+              <button type="button" class="btn-secondary" id="lookupBtn">Find Care Tips</button>
+            </div>
+            <p class="lookup-status" id="lookupStatus"></p>
+            <div class="lookup-preview" id="lookupPreview" hidden></div>
           </div>
-        </fieldset>
 
-        <div class="lookup-panel" aria-live="polite">
-          <label for="lookupInput">Plant Lookup</label>
-          <p class="lookup-help">Enter a plant name or paste plant-tag text, then use the local mock LLM-style provider to suggest care.</p>
-          <div class="lookup-row">
-            <input id="lookupInput" type="text" placeholder="Example: Bush Early Girl Tomato" />
-            <button type="button" class="btn-secondary" id="lookupBtn">Look Up Care Info</button>
+          <label for="name">Plant name</label>
+          <input id="name" name="name" type="text" placeholder="Example: Roma Tomato" required />
+
+          <label for="plantType">Plant kind</label>
+          <select id="plantType" name="plantType">
+            <option value="flower">Flower</option>
+            <option value="herb">Herb</option>
+            <option value="vegetable">Vegetable</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label for="plantingDate">Planting date</label>
+          <input id="plantingDate" name="plantingDate" type="date" required />
+
+          <label for="sunlight">Sunlight</label>
+          <select id="sunlight" name="sunlight">
+            <option value="full sun">Full sun</option>
+            <option value="partial sun">Partial sun</option>
+            <option value="shade">Shade</option>
+            <option value="unknown">Unknown</option>
+          </select>
+
+          <label for="wateringFrequency">Watering rhythm</label>
+          <select id="wateringFrequency" name="wateringFrequency">
+            <option value="daily">Daily</option>
+            <option value="every 2-3 days">Every 2-3 days</option>
+            <option value="weekly">Weekly</option>
+            <option value="unknown">Unknown</option>
+          </select>
+
+          <label for="lastWatered">Last watered</label>
+          <input id="lastWatered" name="lastWatered" type="date" />
+
+          <label for="status">How it looks</label>
+          <select id="status" name="status">
+            <option value="thriving">Thriving</option>
+            <option value="watch">Keep watch</option>
+            <option value="struggling">Needs help</option>
+            <option value="done/removed">Done or removed</option>
+          </select>
+
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="4" placeholder="Any easy reminder for Nana..."></textarea>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="saveBtn">Save Plant</button>
+            <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
           </div>
-          <p class="lookup-status" id="lookupStatus"></p>
-          <div class="lookup-preview" id="lookupPreview" hidden></div>
-        </div>
-
-        <label for="name">Assigned Plant</label>
-        <input id="name" name="name" type="text" placeholder="Example: Sweet Basil" required />
-
-        <label for="plantType">Plant Type</label>
-        <select id="plantType" name="plantType">
-          <option value="flower">Flower</option>
-          <option value="herb">Herb</option>
-          <option value="vegetable">Vegetable</option>
-          <option value="other">Other</option>
-        </select>
-
-        <label for="plantingDate">Planting Date</label>
-        <input id="plantingDate" name="plantingDate" type="date" required />
-
-        <label for="sunlight">Sunlight</label>
-        <select id="sunlight" name="sunlight">
-          <option value="full sun">Full sun</option>
-          <option value="partial sun">Partial sun</option>
-          <option value="shade">Shade</option>
-          <option value="unknown">Unknown</option>
-        </select>
-
-        <label for="wateringFrequency">Watering Frequency</label>
-        <select id="wateringFrequency" name="wateringFrequency">
-          <option value="daily">Daily</option>
-          <option value="every 2-3 days">Every 2-3 days</option>
-          <option value="weekly">Weekly</option>
-          <option value="unknown">Unknown</option>
-        </select>
-
-        <label for="lastWatered">Last Watered Date</label>
-        <input id="lastWatered" name="lastWatered" type="date" />
-
-        <label for="status">Status</label>
-        <select id="status" name="status">
-          <option value="thriving">Thriving</option>
-          <option value="watch">Watch</option>
-          <option value="struggling">Struggling</option>
-          <option value="done/removed">Done/removed</option>
-        </select>
-
-        <label for="notes">Quick Notes</label>
-        <textarea id="notes" name="notes" rows="4" placeholder="Any easy reminder for Nana..."></textarea>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-primary" id="saveBtn">Save Growing Zone</button>
-          <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
-        </div>
-      </form>
+        </form>
+      </details>
     </section>
   </main>
+
+  <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+  <aside class="plant-sheet" id="plantSheet" aria-live="polite" aria-label="Plant details" hidden>
+    <button type="button" class="sheet-close" id="closeSheetBtn" aria-label="Close plant details">×</button>
+    <div id="plantSheetContent"></div>
+  </aside>
 
   <script src="app.js"></script>
 </body>
