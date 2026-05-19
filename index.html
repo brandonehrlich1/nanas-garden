@@ -9,7 +9,7 @@
 <body>
   <header class="top-header">
     <h1>Nana's Garden Tracker</h1>
-    <p>Two cozy sections for Nana's potted plants. Tap a spot to add or update details.</p>
+    <p>A cozy, local-first map of Nana's real raised beds. Add a photo, mark gentle growing zones, and tap each patch to tend it.</p>
   </header>
 
   <main class="app-shell">
@@ -24,17 +24,37 @@
 
     <section class="garden-panel card">
       <div class="panel-head">
-        <h2>Garden Layout</h2>
+        <h2>Garden Beds</h2>
       </div>
       <div id="sectionsWrap" class="sections-wrap"></div>
     </section>
 
     <section class="editor-panel card">
-      <h2 id="editorTitle">Add a Plant Spot</h2>
+      <h2 id="editorTitle">Plant a Growing Zone</h2>
       <form id="plantForm" autocomplete="off">
         <input type="hidden" id="plantId" name="plantId" />
-        <input type="hidden" id="sectionId" name="sectionId" />
         <input type="hidden" id="careProfile" name="careProfile" />
+
+        <fieldset class="zone-fieldset">
+          <legend>Growing Zone</legend>
+          <p class="field-help">Place this plant on the bed photo using simple percentages. You can fine-tune it anytime.</p>
+
+          <label for="sectionId">Garden Bed</label>
+          <select id="sectionId" name="sectionId">
+            <option value="sectionA">Section A</option>
+            <option value="sectionB">Section B</option>
+          </select>
+
+          <label for="zoneLabel">Zone Label</label>
+          <input id="zoneLabel" name="zoneLabel" type="text" placeholder="Example: front-left tomato corner" />
+
+          <div class="zone-grid-inputs">
+            <label for="zoneX">X %<input id="zoneX" name="zoneX" type="number" min="0" max="100" step="1" /></label>
+            <label for="zoneY">Y %<input id="zoneY" name="zoneY" type="number" min="0" max="100" step="1" /></label>
+            <label for="zoneWidth">Width %<input id="zoneWidth" name="zoneWidth" type="number" min="8" max="100" step="1" /></label>
+            <label for="zoneHeight">Height %<input id="zoneHeight" name="zoneHeight" type="number" min="8" max="100" step="1" /></label>
+          </div>
+        </fieldset>
 
         <div class="lookup-panel" aria-live="polite">
           <label for="lookupInput">Plant Lookup</label>
@@ -47,7 +67,7 @@
           <div class="lookup-preview" id="lookupPreview" hidden></div>
         </div>
 
-        <label for="name">Plant Name</label>
+        <label for="name">Assigned Plant</label>
         <input id="name" name="name" type="text" placeholder="Example: Sweet Basil" required />
 
         <label for="plantType">Plant Type</label>
@@ -88,11 +108,11 @@
           <option value="done/removed">Done/removed</option>
         </select>
 
-        <label for="notes">Quick Care Note</label>
+        <label for="notes">Quick Notes</label>
         <textarea id="notes" name="notes" rows="4" placeholder="Any easy reminder for Nana..."></textarea>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary" id="saveBtn">Save Plant Spot</button>
+          <button type="submit" class="btn-primary" id="saveBtn">Save Growing Zone</button>
           <button type="button" class="btn-secondary" id="cancelEditBtn">Cancel</button>
         </div>
       </form>
