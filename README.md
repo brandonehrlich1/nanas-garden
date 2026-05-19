@@ -1,16 +1,16 @@
 # Nana's Garden Tracker
 
 ## What this app does
-Nana's Garden Tracker is a simple static web app for mapping and tending Nana’s real raised garden beds in **Raised Bed A** and **Raised Bed B**.
+Nana's Garden Tracker is a simple static web app that opens directly to a warm **Virtual Garden** view of Nana’s two raised garden beds.
 
-It now includes:
-- Real garden bed photo uploads saved locally in the browser.
-- Tappable, named growing zones mapped over each bed photo with x/y position and width/height percentages.
-- Empty zones that invite planting and filled zones that show plant, watering, health, and quick-note details.
-- Plant zone add/edit/remove actions.
-- Watering helpers like “Watered today,” days since last watered, and a simple watering-due indicator.
-- Plant age tracking (days since planting).
-- Seasonal tips and category-level care suggestions (flower, herb, vegetable, other).
+It includes:
+- A cute CSS/SVG-style schematic of the **Upper Bed / Raised Bed A** and **Lower Bed / Raised Bed B**.
+- Nana's seeded tomatoes, cucumber, jalapeño pepper, and marigold clusters placed in their real garden spots.
+- Large tappable plant markers with emoji/icons and plant names.
+- A simple plant detail card with water status, care tips, notes, and quick actions.
+- Secondary add/edit tools for changing plants without making setup feel required.
+- Local care profiles for the seeded plants.
+- Automatic seeded garden loading only when browser `localStorage` has no existing app data.
 
 ## How to open it locally
 1. Clone or download this repo.
@@ -19,36 +19,15 @@ It now includes:
 No build tools or dependencies are required.
 
 ## What data is saved locally
-The app saves bed photos and plant zone data in your browser `localStorage`.
+The app saves garden and plant data in your browser `localStorage`.
 
 Storage keys:
-- `nanasGardenDataV3` (current)
-- `nanasGardenDataV2` (previous version; migrated when possible)
-- `nanasGardenData` (legacy key from older app; old data is migrated when possible)
+- `nanasGardenDataV4` (current)
+- `nanasGardenDataV3`, `nanasGardenDataV2`, and `nanasGardenData` (older app data is migrated when possible)
 
-Each bed record can include:
-- `backgroundImage` (a resized photo data URL stored locally)
-
-Each plant zone record includes:
-- `id`
-- `sectionId`
-- `zoneLabel`
-- `zoneX`
-- `zoneY`
-- `zoneWidth`
-- `zoneHeight`
-- `name`
-- `plantType`
-- `plantingDate`
-- `sunlight`
-- `wateringFrequency`
-- `notes`
-- `lastWatered`
-- `status`
-- `careProfile`
+The app keeps plant placement and care data internally so Nana sees friendly words like bed, plant, spot, and garden instead of setup details.
 
 ## Known limitations
-- This app uses broad, general gardening suggestions and is not plant-specific care guidance.
+- This app uses broad, general gardening suggestions and is not plant-specific professional advice.
 - Data is tied to the browser/device where it was entered (no cloud sync).
-- Photos are stored as local browser data URLs, so very large uploads may hit browser storage limits.
 - No offline backup/export yet.

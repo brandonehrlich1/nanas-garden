@@ -1,15 +1,14 @@
-const STORAGE_KEY = 'nanasGardenDataV3';
-const PREVIOUS_STORAGE_KEY = 'nanasGardenDataV2';
-const LEGACY_STORAGE_KEY = 'nanasGardenData';
+const STORAGE_KEY = 'nanasGardenDataV4';
+const PREVIOUS_STORAGE_KEYS = ['nanasGardenDataV3', 'nanasGardenDataV2', 'nanasGardenData'];
 const SECTIONS = [
-  { id: 'sectionA', label: 'Raised Bed A' },
-  { id: 'sectionB', label: 'Raised Bed B' }
+  { id: 'sectionA', label: 'Upper Bed', nickname: 'Raised Bed A' },
+  { id: 'sectionB', label: 'Lower Bed', nickname: 'Raised Bed B' }
 ];
 
 const PLANT_TYPE_TIPS = {
-  flower: 'Flowers usually like regular deadheading and steady moisture.',
+  flower: 'Flowers usually like spent blooms pinched off and steady moisture.',
   herb: 'Herbs often do best with regular trimming and good light.',
-  vegetable: 'Vegetables often need extra feeding as they produce.',
+  vegetable: 'Vegetables often need steady water and extra food as they produce.',
   other: 'Check the plant tag for the best specific care routine.'
 };
 
@@ -20,6 +19,18 @@ const WATERING_INTERVAL_DAYS = {
   unknown: null
 };
 
+const SPOT_PRESETS = {
+  'upper-left': { label: 'Upper left', x: 22, y: 20 },
+  'upper-middle': { label: 'Upper middle', x: 50, y: 25 },
+  'upper-right': { label: 'Upper right', x: 74, y: 22 },
+  'middle-left': { label: 'Middle left', x: 34, y: 50 },
+  center: { label: 'Center', x: 54, y: 46 },
+  'middle-right': { label: 'Middle right', x: 64, y: 48 },
+  'lower-left': { label: 'Lower left', x: 30, y: 72 },
+  'lower-middle': { label: 'Lower middle', x: 50, y: 74 },
+  'lower-right': { label: 'Lower right', x: 74, y: 76 }
+};
+
 const MOCK_PLANT_PROFILES = [
   makeMockProfile({
     lookupKey: 'bush early girl tomato',
@@ -27,12 +38,8 @@ const MOCK_PLANT_PROFILES = [
     plantType: 'vegetable',
     sunlight: 'full sun',
     wateringFrequency: 'daily',
-    careNotes: 'Compact determinate tomato. Keep soil evenly moist, support heavy fruiting stems, and feed regularly once fruit sets.',
-    generatedTasks: [
-      'Check pot moisture each morning during warm weather.',
-      'Add or adjust a small cage as fruit clusters get heavier.',
-      'Feed with tomato fertilizer every 2 weeks while fruiting.'
-    ],
+    careNotes: 'Compact tomato. Keep soil evenly moist, support heavy fruiting stems, and feed regularly once fruit sets.',
+    generatedTasks: ['Check soil moisture each morning during warm weather.', 'Adjust a small cage as fruit clusters get heavier.', 'Feed with tomato fertilizer every 2 weeks while fruiting.'],
     tags: ['tomato', 'determinate', 'container friendly']
   }),
   makeMockProfile({
@@ -41,12 +48,8 @@ const MOCK_PLANT_PROFILES = [
     plantType: 'vegetable',
     sunlight: 'full sun',
     wateringFrequency: 'daily',
-    careNotes: 'Paste tomato that likes steady moisture and support. Avoid overhead watering to reduce leaf disease pressure.',
-    generatedTasks: [
-      'Water deeply when the top inch of soil is dry.',
-      'Tie stems to a stake or cage as the plant grows.',
-      'Remove yellow lower leaves to improve airflow.'
-    ],
+    careNotes: 'Paste tomato that likes steady moisture and support. Water at the soil to help keep leaves dry.',
+    generatedTasks: ['Water deeply when the top inch of soil is dry.', 'Tie stems to a stake or cage as the plant grows.', 'Remove yellow lower leaves to improve airflow.'],
     tags: ['tomato', 'paste', 'sauce']
   }),
   makeMockProfile({
@@ -56,26 +59,18 @@ const MOCK_PLANT_PROFILES = [
     sunlight: 'full sun',
     wateringFrequency: 'daily',
     careNotes: 'Vigorous cherry tomato that can produce long clusters. Give strong support, steady water, and frequent harvesting.',
-    generatedTasks: [
-      'Harvest ripe cherry tomatoes every 1 to 2 days.',
-      'Guide new vines back into the cage or onto supports.',
-      'Feed lightly every 2 weeks during peak harvest.'
-    ],
+    generatedTasks: ['Harvest ripe cherry tomatoes every 1 to 2 days.', 'Guide new vines back into the cage or onto supports.', 'Feed lightly every 2 weeks during peak harvest.'],
     tags: ['tomato', 'cherry', 'indeterminate']
   }),
   makeMockProfile({
-    lookupKey: 'sun sugar tomato',
-    commonName: 'Sun Sugar Tomato',
+    lookupKey: 'sun sugar yellow cherry tomato',
+    commonName: 'Sun Sugar Yellow Cherry Tomato',
     plantType: 'vegetable',
     sunlight: 'full sun',
     wateringFrequency: 'daily',
-    careNotes: 'Sweet orange cherry tomato with vigorous growth. It benefits from a tall cage, even moisture, and regular picking.',
-    generatedTasks: [
-      'Pick orange ripe fruit often to keep production going.',
-      'Check that vines are supported after storms or wind.',
-      'Mulch the pot surface to help even out moisture.'
-    ],
-    tags: ['tomato', 'orange cherry', 'indeterminate']
+    careNotes: 'Sweet yellow-orange cherry tomato with vigorous growth. It benefits from a tall cage, even moisture, and regular picking.',
+    generatedTasks: ['Pick ripe fruit often to keep production going.', 'Check that vines are supported after storms or wind.', 'Mulch the soil surface to help even out moisture.'],
+    tags: ['tomato', 'yellow cherry', 'indeterminate']
   }),
   makeMockProfile({
     lookupKey: 'jalapeno pepper',
@@ -84,11 +79,7 @@ const MOCK_PLANT_PROFILES = [
     sunlight: 'full sun',
     wateringFrequency: 'every 2-3 days',
     careNotes: 'Warm-season pepper. Let the top of the soil begin to dry between deep waterings, and harvest green or red peppers when firm.',
-    generatedTasks: [
-      'Check soil moisture every 2 to 3 days before watering.',
-      'Harvest firm peppers to encourage more blooms.',
-      'Watch for aphids on new growth and rinse them off early.'
-    ],
+    generatedTasks: ['Check soil moisture every 2 to 3 days before watering.', 'Harvest firm peppers to encourage more blooms.', 'Watch for aphids on new growth and rinse them off early.'],
     tags: ['pepper', 'hot pepper', 'container friendly']
   }),
   makeMockProfile({
@@ -98,11 +89,7 @@ const MOCK_PLANT_PROFILES = [
     sunlight: 'full sun',
     wateringFrequency: 'daily',
     careNotes: 'Fast-growing cucumber that needs consistent water and room to climb or trail. Pick fruit before it gets oversized.',
-    generatedTasks: [
-      'Water consistently so fruit does not turn bitter.',
-      'Train vines onto a trellis or guide them away from other pots.',
-      'Harvest cucumbers when they are firm and medium sized.'
-    ],
+    generatedTasks: ['Water consistently so fruit does not turn bitter.', 'Guide vines away from other plants.', 'Harvest cucumbers when they are firm and medium sized.'],
     tags: ['cucumber', 'vine', 'slicing']
   }),
   makeMockProfile({
@@ -112,89 +99,142 @@ const MOCK_PLANT_PROFILES = [
     sunlight: 'full sun',
     wateringFrequency: 'every 2-3 days',
     careNotes: 'Easy annual flower. Deadhead spent blooms and water at the soil line after the top layer begins to dry.',
-    generatedTasks: [
-      'Pinch off faded flowers weekly for more blooms.',
-      'Water when the top inch of soil feels dry.',
-      'Trim leggy stems to keep the plant bushy.'
-    ],
+    generatedTasks: ['Pinch off faded flowers weekly for more blooms.', 'Water when the top inch of soil feels dry.', 'Trim leggy stems to keep the plant bushy.'],
     tags: ['flower', 'annual', 'pollinator friendly']
   })
 ];
 
 const plantLookupProvider = createMockPlantLookupProvider(MOCK_PLANT_PROFILES);
 
-
 let appState = loadState();
 let editingPlantId = null;
+let openSheetPlant = null;
 
 const seasonPill = document.getElementById('seasonPill');
 const seasonTip = document.getElementById('seasonTip');
 const seasonChange = document.getElementById('seasonChange');
 const categoryTips = document.getElementById('categoryTips');
 const sectionsWrap = document.getElementById('sectionsWrap');
-
 const plantForm = document.getElementById('plantForm');
 const editorTitle = document.getElementById('editorTitle');
+const editorDetails = document.getElementById('editorDetails');
 const saveBtn = document.getElementById('saveBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
+const showAddPlantBtn = document.getElementById('showAddPlantBtn');
 const lookupInput = document.getElementById('lookupInput');
 const lookupBtn = document.getElementById('lookupBtn');
 const lookupStatus = document.getElementById('lookupStatus');
 const lookupPreview = document.getElementById('lookupPreview');
+const plantSheet = document.getElementById('plantSheet');
+const plantSheetContent = document.getElementById('plantSheetContent');
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const closeSheetBtn = document.getElementById('closeSheetBtn');
 
 plantForm.addEventListener('submit', handleSavePlant);
 cancelEditBtn.addEventListener('click', resetForm);
 lookupBtn.addEventListener('click', handlePlantLookup);
+showAddPlantBtn.addEventListener('click', openAddPlantForm);
+document.getElementById('sectionId').addEventListener('change', updateHiddenSpotFields);
+document.getElementById('spotPreset').addEventListener('change', updateHiddenSpotFields);
+closeSheetBtn.addEventListener('click', closePlantSheet);
+sheetBackdrop.addEventListener('click', closePlantSheet);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closePlantSheet();
+});
 
 renderSeasonPanel();
 renderGarden();
 resetForm();
 
 function loadState() {
-  const cleanState = createEmptyState();
   try {
     const currentRaw = localStorage.getItem(STORAGE_KEY);
-    if (currentRaw) {
-      return normalizeState(JSON.parse(currentRaw));
-    }
+    if (currentRaw) return normalizeState(JSON.parse(currentRaw));
 
-    const previousRaw = localStorage.getItem(PREVIOUS_STORAGE_KEY);
-    if (previousRaw) {
-      const migrated = normalizeState(JSON.parse(previousRaw));
+    for (const key of PREVIOUS_STORAGE_KEYS) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const migrated = key === 'nanasGardenData' ? migrateLegacyData(JSON.parse(raw)) : normalizeState(JSON.parse(raw));
       saveState(migrated);
       return migrated;
     }
 
-    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (!legacyRaw) return cleanState;
-
-    const legacyParsed = JSON.parse(legacyRaw);
-    return migrateLegacyData(legacyParsed);
+    const seeded = createSeededState();
+    saveState(seeded);
+    return seeded;
   } catch {
-    return cleanState;
+    const seeded = createSeededState();
+    saveState(seeded);
+    return seeded;
   }
 }
 
 function createEmptyState() {
   return {
     sections: { sectionA: [], sectionB: [] },
-    beds: {
-      sectionA: { backgroundImage: '' },
-      sectionB: { backgroundImage: '' }
-    }
+    beds: { sectionA: { backgroundImage: '' }, sectionB: { backgroundImage: '' } }
   };
+}
+
+function createSeededState() {
+  const plantedOn = '2026-05-01';
+  const lastWatered = getTodayISO();
+  const seed = createEmptyState();
+  seed.sections.sectionA = [
+    seedPlant('sectionA', 'Bush Early Girl Tomato', 'upper-right', 72, 18, '🍅', plantedOn, lastWatered, 'Already tucked into the upper right of the upper bed.'),
+    seedPlant('sectionA', 'Sun Sugar Yellow Cherry Tomato', 'middle-right', 64, 48, '🍅', plantedOn, lastWatered, 'A sweet yellow cherry tomato in the middle right.'),
+    seedPlant('sectionA', 'Sweet Million Cherry Tomato', 'lower-right', 72, 74, '🍅', plantedOn, lastWatered, 'Cherry tomato in the lower right corner.'),
+    seedPlant('sectionA', 'Roma Tomato', 'lower-left', 30, 72, '🍅', plantedOn, lastWatered, 'Roma tomato in the lower left.'),
+    seedPlant('sectionA', 'Marigold cluster', 'middle-left', 38, 45, '🌼', plantedOn, lastWatered, 'Bright companion flowers near the middle left.'),
+    seedPlant('sectionA', 'Marigold cluster', 'upper-middle', 50, 25, '🌼', plantedOn, lastWatered, 'Sunny marigolds near the upper middle.')
+  ];
+  seed.sections.sectionB = [
+    seedPlant('sectionB', 'Slicing Cucumber', 'upper-left', 22, 20, '🥒', plantedOn, lastWatered, 'Cucumber placed in the upper left.'),
+    seedPlant('sectionB', 'Jalapeño Pepper', 'upper-right', 74, 22, '🌶️', plantedOn, lastWatered, 'Pepper plant in the upper right.'),
+    seedPlant('sectionB', 'Marigold cluster', 'middle-left', 34, 50, '🌼', plantedOn, lastWatered, 'Marigolds in the center-left area.'),
+    seedPlant('sectionB', 'Marigold cluster', 'center', 54, 46, '🌼', plantedOn, lastWatered, 'Marigolds blooming near the center.'),
+    seedPlant('sectionB', 'Tomato plant', 'lower-right', 74, 76, '🍅', plantedOn, lastWatered, 'Tomato plant in the lower right.')
+  ];
+  return seed;
+}
+
+function seedPlant(sectionId, name, spotPreset, x, y, icon, plantingDate, lastWatered, notes) {
+  const profile = getSeedCareProfile(name);
+  return normalizePlant({
+    id: `seed-${sectionId}-${normalizeLookupText(name)}-${x}-${y}`,
+    sectionId,
+    zoneLabel: SPOT_PRESETS[spotPreset]?.label || 'Garden spot',
+    zoneX: x,
+    zoneY: y,
+    zoneWidth: 18,
+    zoneHeight: 18,
+    icon,
+    name,
+    plantType: profile?.plantType || (name.toLowerCase().includes('marigold') ? 'flower' : 'vegetable'),
+    plantingDate,
+    sunlight: profile?.sunlight || 'full sun',
+    wateringFrequency: profile?.wateringFrequency || 'unknown',
+    notes,
+    lastWatered,
+    status: 'thriving',
+    careProfile: profile
+  });
+}
+
+function getSeedCareProfile(name) {
+  const lookupName = name.toLowerCase().includes('marigold') ? 'marigold' : name;
+  const matched = findMockProfile(normalizeLookupText(lookupName), new Map(MOCK_PLANT_PROFILES.map((profile) => [normalizeLookupText(profile.lookupKey), profile])));
+  return matched ? normalizeCareProfile({ ...matched, provider: 'mock-local', matchedFrom: matched.commonName }) : null;
 }
 
 function normalizeState(state) {
   const base = createEmptyState();
   if (!state || typeof state !== 'object' || !state.sections) return base;
-
   for (const section of SECTIONS) {
     const spots = Array.isArray(state.sections[section.id]) ? state.sections[section.id] : [];
     base.sections[section.id] = spots.map((plant, index) => normalizePlant(plant, index)).filter(Boolean);
     base.beds[section.id] = normalizeBed(state.beds?.[section.id]);
   }
-
   return base;
 }
 
@@ -204,16 +244,17 @@ function normalizeBed(bed) {
 
 function normalizePlant(plant, index = 0) {
   if (!plant || typeof plant !== 'object') return null;
-  const defaultZone = getDefaultZone(index);
+  const defaultSpot = getDefaultSpot(index);
   const name = String(plant.name || '').trim();
   return {
     id: String(plant.id || createPlantId()),
     sectionId: plant.sectionId === 'sectionB' ? 'sectionB' : 'sectionA',
-    zoneLabel: String(plant.zoneLabel || plant.label || name || `Zone ${index + 1}`).trim(),
-    zoneX: clampPercent(plant.zoneX ?? plant.x, defaultZone.x, 0, 92),
-    zoneY: clampPercent(plant.zoneY ?? plant.y, defaultZone.y, 0, 92),
-    zoneWidth: clampPercent(plant.zoneWidth ?? plant.width, defaultZone.width, 8, 100),
-    zoneHeight: clampPercent(plant.zoneHeight ?? plant.height, defaultZone.height, 8, 100),
+    zoneLabel: String(plant.zoneLabel || plant.label || defaultSpot.label || 'Garden spot').trim(),
+    zoneX: clampPercent(plant.zoneX ?? plant.x, defaultSpot.x, 0, 92),
+    zoneY: clampPercent(plant.zoneY ?? plant.y, defaultSpot.y, 0, 92),
+    zoneWidth: clampPercent(plant.zoneWidth ?? plant.width, 18, 12, 32),
+    zoneHeight: clampPercent(plant.zoneHeight ?? plant.height, 18, 12, 32),
+    icon: String(plant.icon || getPlantIcon(name, plant.plantType)).trim(),
     name,
     plantType: asEnum(plant.plantType, ['flower', 'herb', 'vegetable', 'other'], 'other'),
     plantingDate: plant.plantingDate || '',
@@ -228,12 +269,10 @@ function normalizePlant(plant, index = 0) {
 
 function migrateLegacyData(legacyData) {
   const state = createEmptyState();
-
   for (const section of SECTIONS) {
     const legacyPlant = legacyData?.[section.id];
     if (!legacyPlant || typeof legacyPlant !== 'object') continue;
     if (!legacyPlant.name && !legacyPlant.date && !legacyPlant.notes) continue;
-
     state.sections[section.id].push(normalizePlant({
       id: createPlantId(),
       sectionId: section.id,
@@ -247,8 +286,6 @@ function migrateLegacyData(legacyData) {
       status: 'watch'
     }));
   }
-
-  saveState(state);
   return state;
 }
 
@@ -259,15 +296,11 @@ function saveState(state) {
 function handleSavePlant(event) {
   event.preventDefault();
   const plant = readPlantFromForm();
-
-  if (editingPlantId) {
-    updatePlant(plant);
-  } else {
-    addPlant(plant);
-  }
-
+  if (editingPlantId) updatePlant(plant);
+  else addPlant(plant);
   saveState(appState);
   renderGarden();
+  openPlantSheet(plant.sectionId, plant.id);
   resetForm();
 }
 
@@ -301,7 +334,6 @@ function updatePlant(updatedPlant) {
   for (const section of SECTIONS) {
     const idx = appState.sections[section.id].findIndex((plant) => plant.id === editingPlantId);
     if (idx === -1) continue;
-
     appState.sections[section.id].splice(idx, 1);
     appState.sections[updatedPlant.sectionId].push(updatedPlant);
     return;
@@ -312,6 +344,7 @@ function removePlant(sectionId, plantId) {
   appState.sections[sectionId] = appState.sections[sectionId].filter((plant) => plant.id !== plantId);
   saveState(appState);
   renderGarden();
+  closePlantSheet();
   if (editingPlantId === plantId) resetForm();
 }
 
@@ -321,19 +354,28 @@ function markWateredToday(sectionId, plantId) {
   plant.lastWatered = getTodayISO();
   saveState(appState);
   renderGarden();
-  if (editingPlantId === plantId) {
-    document.getElementById('lastWatered').value = plant.lastWatered;
-  }
+  openPlantSheet(sectionId, plantId);
+  if (editingPlantId === plantId) setValue('lastWatered', plant.lastWatered);
+}
+
+function addNote(sectionId, plantId) {
+  const plant = appState.sections[sectionId].find((item) => item.id === plantId);
+  if (!plant) return;
+  const note = window.prompt(`Add a note for ${plant.name}:`, plant.notes || '');
+  if (note === null) return;
+  plant.notes = note.trim();
+  saveState(appState);
+  renderGarden();
+  openPlantSheet(sectionId, plantId);
 }
 
 function startEdit(sectionId, plantId) {
   const plant = appState.sections[sectionId].find((item) => item.id === plantId);
   if (!plant) return;
-
   editingPlantId = plantId;
-  editorTitle.textContent = plant.name ? `Tend ${plant.name} (${sectionLabel(sectionId)})` : `Plant ${plant.zoneLabel} (${sectionLabel(sectionId)})`;
-  saveBtn.textContent = plant.name ? 'Update Growing Zone' : 'Plant This Zone';
-
+  editorDetails.open = true;
+  editorTitle.textContent = plant.name ? `Edit ${plant.name}` : 'Add a Plant';
+  saveBtn.textContent = plant.name ? 'Save Changes' : 'Save Plant';
   setValue('plantId', plant.id);
   setValue('sectionId', plant.sectionId);
   setValue('zoneLabel', plant.zoneLabel);
@@ -341,6 +383,7 @@ function startEdit(sectionId, plantId) {
   setValue('zoneY', plant.zoneY);
   setValue('zoneWidth', plant.zoneWidth);
   setValue('zoneHeight', plant.zoneHeight);
+  setValue('spotPreset', getNearestSpotPreset(plant.zoneX, plant.zoneY));
   setValue('name', plant.name);
   setValue('plantType', plant.plantType);
   setValue('plantingDate', plant.plantingDate);
@@ -352,8 +395,13 @@ function startEdit(sectionId, plantId) {
   setValue('careProfile', plant.careProfile ? JSON.stringify(plant.careProfile) : '');
   lookupInput.value = plant.name || '';
   showLookupPreview(plant.careProfile);
+  document.getElementById('editorPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+function openAddPlantForm() {
+  resetForm();
+  editorDetails.open = true;
+  document.getElementById('editorPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function resetForm() {
@@ -361,21 +409,29 @@ function resetForm() {
   plantForm.reset();
   setValue('plantId', '');
   setValue('sectionId', 'sectionA');
+  setValue('spotPreset', 'center');
   setValue('status', 'thriving');
-  setValue('plantType', 'flower');
+  setValue('plantType', 'vegetable');
   setValue('sunlight', 'full sun');
   setValue('wateringFrequency', 'daily');
+  setValue('plantingDate', getTodayISO());
+  setValue('lastWatered', '');
   setValue('careProfile', '');
-  setValue('zoneLabel', '');
-  setValue('zoneX', 12);
-  setValue('zoneY', 12);
-  setValue('zoneWidth', 30);
-  setValue('zoneHeight', 24);
+  updateHiddenSpotFields();
   lookupInput.value = '';
   lookupStatus.textContent = '';
   showLookupPreview(null);
-  editorTitle.textContent = 'Plant a Growing Zone';
-  saveBtn.textContent = 'Save Growing Zone';
+  editorTitle.textContent = 'Add or Edit a Plant';
+  saveBtn.textContent = 'Save Plant';
+}
+
+function updateHiddenSpotFields() {
+  const preset = SPOT_PRESETS[document.getElementById('spotPreset').value] || SPOT_PRESETS.center;
+  setValue('zoneLabel', preset.label);
+  setValue('zoneX', preset.x);
+  setValue('zoneY', preset.y);
+  setValue('zoneWidth', 18);
+  setValue('zoneHeight', 18);
 }
 
 function renderGarden() {
@@ -383,232 +439,104 @@ function renderGarden() {
   for (const section of SECTIONS) {
     const sectionCard = document.createElement('article');
     sectionCard.className = 'section-card';
-
-    const header = document.createElement('div');
-    header.className = 'section-card-head';
-    header.innerHTML = `
-      <div>
-        <h3>${escapeHtml(section.label)}</h3>
-        <p>A real-photo bed map with gentle tappable growing zones.</p>
+    sectionCard.innerHTML = `
+      <div class="section-card-head">
+        <div>
+          <h3>${escapeHtml(section.label)}</h3>
+          <p>${escapeHtml(section.nickname)} · tap any plant</p>
+        </div>
       </div>
     `;
-    sectionCard.appendChild(header);
-    sectionCard.appendChild(createBedToolbar(section));
     sectionCard.appendChild(createBedMap(section));
-
-    const plants = appState.sections[section.id];
-    if (plants.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'empty-note';
-      empty.textContent = 'No mapped zones yet. Add a photo, then make the first cozy growing zone.';
-      sectionCard.appendChild(empty);
-    } else {
-      const grid = document.createElement('div');
-      grid.className = 'spots-grid';
-      plants.forEach((plant) => {
-        grid.appendChild(createSpotCard(section.id, plant));
-      });
-      sectionCard.appendChild(grid);
-    }
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn-secondary';
-    addBtn.textContent = `+ Plant a zone in ${section.label}`;
-    addBtn.addEventListener('click', () => {
-      resetForm();
-      setValue('sectionId', section.id);
-      setValue('zoneLabel', `New ${section.label} zone`);
-      editorTitle.textContent = `Plant a Growing Zone (${section.label})`;
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    });
-
-    sectionCard.appendChild(addBtn);
     sectionsWrap.appendChild(sectionCard);
   }
 }
 
-function createBedToolbar(section) {
-  const toolbar = document.createElement('div');
-  toolbar.className = 'bed-toolbar';
-
-  const uploadLabel = document.createElement('label');
-  uploadLabel.className = 'photo-upload btn-secondary';
-  uploadLabel.textContent = appState.beds[section.id].backgroundImage ? 'Change bed photo' : 'Add bed photo';
-
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.addEventListener('change', (event) => handleBedPhotoUpload(section.id, event));
-  uploadLabel.appendChild(input);
-
-  const zoneBtn = makeButton('+ Empty zone', 'btn-secondary', () => addEmptyZone(section.id));
-  toolbar.appendChild(uploadLabel);
-  toolbar.appendChild(zoneBtn);
-
-  if (appState.beds[section.id].backgroundImage) {
-    toolbar.appendChild(makeButton('Remove photo', 'btn-secondary', () => removeBedPhoto(section.id)));
-  }
-
-  return toolbar;
-}
-
 function createBedMap(section) {
-  const bed = appState.beds[section.id];
   const map = document.createElement('div');
-  map.className = bed.backgroundImage ? 'bed-map has-photo' : 'bed-map';
-
-  if (bed.backgroundImage) {
-    const img = document.createElement('img');
-    img.src = bed.backgroundImage;
-    img.alt = `${section.label} garden bed photo`;
-    map.appendChild(img);
-  } else {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'bed-placeholder';
-    placeholder.innerHTML = `
-      <span>🌿</span>
-      <strong>Add the real ${escapeHtml(section.label)} photo</strong>
-      <small>Then place growing zones over the picture.</small>
-    `;
-    map.appendChild(placeholder);
-  }
-
+  map.className = `bed-map bed-map-${section.id}`;
+  map.setAttribute('aria-label', `${section.label} virtual raised bed`);
+  map.innerHTML = `
+    <div class="soil-texture" aria-hidden="true"></div>
+    <div class="bed-path bed-path-top" aria-hidden="true"></div>
+    <div class="bed-path bed-path-bottom" aria-hidden="true"></div>
+  `;
   appState.sections[section.id].forEach((plant) => {
-    map.appendChild(createZoneButton(section.id, plant));
+    map.appendChild(createPlantMarker(section.id, plant));
   });
-
   return map;
 }
 
-function createZoneButton(sectionId, plant) {
-  const zone = document.createElement('button');
+function createPlantMarker(sectionId, plant) {
+  const marker = document.createElement('button');
   const waterInfo = getWateringStatus(plant);
-  const isEmpty = !plant.name;
-  zone.type = 'button';
-  zone.className = `zone-marker ${isEmpty ? 'zone-empty' : 'zone-filled'}`;
-  zone.style.left = `${plant.zoneX}%`;
-  zone.style.top = `${plant.zoneY}%`;
-  zone.style.width = `${plant.zoneWidth}%`;
-  zone.style.height = `${plant.zoneHeight}%`;
-  zone.setAttribute('aria-label', isEmpty ? `Plant ${plant.zoneLabel}` : `Open details for ${plant.name}`);
-  zone.innerHTML = isEmpty ? `
-    <span class="zone-label">${escapeHtml(plant.zoneLabel)}</span>
-    <span class="zone-invite">Ready to plant</span>
-  ` : `
-    <span class="zone-label">${escapeHtml(plant.zoneLabel)}</span>
-    <strong>${escapeHtml(plant.name)}</strong>
-    <span>${escapeHtml(waterInfo.label)} · ${escapeHtml(plant.status)}</span>
-    <small>${escapeHtml(plant.notes || 'Tap for notes & care')}</small>
+  marker.type = 'button';
+  marker.className = `plant-marker plant-${plant.plantType}`;
+  marker.style.left = `${plant.zoneX}%`;
+  marker.style.top = `${plant.zoneY}%`;
+  marker.setAttribute('aria-label', `Open ${plant.name || 'plant'} details`);
+  marker.innerHTML = `
+    <span class="plant-icon" aria-hidden="true">${escapeHtml(plant.icon || getPlantIcon(plant.name, plant.plantType))}</span>
+    <span class="plant-name">${escapeHtml(plant.name || 'New plant')}</span>
+    <span class="plant-water ${waterInfo.className}">${escapeHtml(waterInfo.label)}</span>
   `;
-  zone.addEventListener('click', () => startEdit(sectionId, plant.id));
-  return zone;
+  marker.addEventListener('click', () => openPlantSheet(sectionId, plant.id));
+  return marker;
 }
 
-function addEmptyZone(sectionId) {
-  const index = appState.sections[sectionId].length;
-  const defaults = getDefaultZone(index);
-  const emptyZone = normalizePlant({
-    id: createPlantId(),
-    sectionId,
-    zoneLabel: `Zone ${index + 1}`,
-    zoneX: defaults.x,
-    zoneY: defaults.y,
-    zoneWidth: defaults.width,
-    zoneHeight: defaults.height,
-    status: 'watch',
-    plantType: 'other',
-    sunlight: 'unknown',
-    wateringFrequency: 'unknown'
-  }, index);
-
-  appState.sections[sectionId].push(emptyZone);
-  saveState(appState);
-  renderGarden();
-  startEdit(sectionId, emptyZone.id);
+function openPlantSheet(sectionId, plantId) {
+  const plant = appState.sections[sectionId].find((item) => item.id === plantId);
+  if (!plant) return;
+  openSheetPlant = { sectionId, plantId };
+  const waterInfo = getWateringStatus(plant);
+  plantSheetContent.innerHTML = `
+    <p class="sheet-kicker">${escapeHtml(sectionLabel(sectionId))}</p>
+    <h2>${escapeHtml(plant.icon || getPlantIcon(plant.name, plant.plantType))} ${escapeHtml(plant.name)}</h2>
+    <div class="sheet-info">
+      <p><strong>Water status</strong><span class="${waterInfo.className}">${escapeHtml(waterInfo.label)}</span></p>
+      <p><strong>Last watered</strong><span>${escapeHtml(formatDate(plant.lastWatered) || 'Not recorded yet')}</span></p>
+      <p><strong>Care tips</strong><span>${escapeHtml(getCareSummary(plant))}</span></p>
+      <p><strong>Notes</strong><span>${escapeHtml(plant.notes || 'No note yet.')}</span></p>
+    </div>
+    ${renderCareTasks(plant.careProfile)}
+    <div class="sheet-actions" id="sheetActions"></div>
+  `;
+  const actions = plantSheetContent.querySelector('#sheetActions');
+  actions.appendChild(makeButton('Watered Today', 'btn-primary', () => markWateredToday(sectionId, plant.id)));
+  actions.appendChild(makeButton('Add Note', 'btn-secondary', () => addNote(sectionId, plant.id)));
+  actions.appendChild(makeButton('Edit', 'btn-secondary', () => startEdit(sectionId, plant.id)));
+  actions.appendChild(makeButton('Remove', 'btn-danger quiet-danger', () => removePlant(sectionId, plant.id)));
+  plantSheet.hidden = false;
+  sheetBackdrop.hidden = false;
+  requestAnimationFrame(() => plantSheet.classList.add('is-open'));
 }
 
-async function handleBedPhotoUpload(sectionId, event) {
-  const [file] = event.target.files || [];
-  if (!file) return;
-
-  try {
-    appState.beds[sectionId].backgroundImage = await readImageAsResizedDataUrl(file);
-    saveState(appState);
-    renderGarden();
-  } catch (error) {
-    alert(error.message || 'That photo could not be saved in this browser. Try a smaller image.');
-  }
+function closePlantSheet() {
+  openSheetPlant = null;
+  plantSheet.classList.remove('is-open');
+  plantSheet.hidden = true;
+  sheetBackdrop.hidden = true;
 }
-
-function removeBedPhoto(sectionId) {
-  appState.beds[sectionId].backgroundImage = '';
-  saveState(appState);
-  renderGarden();
-}
-
-function createSpotCard(sectionId, plant) {
-  const card = document.createElement('div');
-  card.className = plant.name ? 'spot-card' : 'spot-card empty-zone-card';
-
-  if (!plant.name) {
-    card.innerHTML = `
-      <h4>${escapeHtml(plant.zoneLabel)}</h4>
-      <p>This mapped patch is waiting for something lovely.</p>
-      <p><strong>Position:</strong> ${plant.zoneX}% / ${plant.zoneY}% · ${plant.zoneWidth}% × ${plant.zoneHeight}%</p>
-    `;
-  } else {
-    const ageText = plant.plantingDate ? `${getDaysSince(plant.plantingDate)} day(s) old` : 'No planting date';
-    const waterInfo = getWateringStatus(plant);
-    const daysSinceWatered = getDaysSince(plant.lastWatered);
-
-    card.innerHTML = `
-      <h4>${escapeHtml(plant.name)} <span>${escapeHtml(plant.zoneLabel)}</span></h4>
-      <p><strong>Health:</strong> ${escapeHtml(plant.status)}</p>
-      <p><strong>Planted:</strong> ${formatDate(plant.plantingDate) || '—'} (${ageText})</p>
-      <p><strong>Watered:</strong> ${formatDate(plant.lastWatered) || 'Not set'}${Number.isFinite(daysSinceWatered) ? ` (${daysSinceWatered} day(s) ago)` : ''}</p>
-      <p><strong>Watering:</strong> <span class="${waterInfo.className}">${waterInfo.label}</span></p>
-      <p><strong>Quick notes:</strong> ${escapeHtml(plant.notes || 'No note yet.')}</p>
-      ${renderCareProfileForCard(plant.careProfile)}
-    `;
-  }
-
-  const actions = document.createElement('div');
-  actions.className = 'spot-actions';
-
-  if (plant.name) {
-    actions.appendChild(makeButton('Watered today', 'btn-primary', () => markWateredToday(sectionId, plant.id)));
-  } else {
-    actions.appendChild(makeButton('Plant here', 'btn-primary', () => startEdit(sectionId, plant.id)));
-  }
-  actions.appendChild(makeButton('Edit zone', 'btn-secondary', () => startEdit(sectionId, plant.id)));
-  actions.appendChild(makeButton('Remove', 'btn-danger', () => removePlant(sectionId, plant.id)));
-
-  card.appendChild(actions);
-  return card;
-}
-
 
 async function handlePlantLookup() {
   const query = lookupInput.value.trim() || document.getElementById('name').value.trim();
   if (!query) {
-    lookupStatus.textContent = 'Enter a plant name or paste plant-tag text first.';
+    lookupStatus.textContent = 'Enter a plant name first.';
     lookupStatus.className = 'lookup-status status-watch';
     return;
   }
-
   lookupBtn.disabled = true;
-  lookupStatus.textContent = 'Looking up local mock care profile...';
+  lookupStatus.textContent = 'Finding local care tips...';
   lookupStatus.className = 'lookup-status';
-
   try {
     const result = await plantLookupProvider.lookupCareProfile(query);
     applyLookupResult(result);
-    lookupStatus.textContent = `Suggested care profile found: ${result.commonName}`;
+    lookupStatus.textContent = `Care tips ready for ${result.commonName}.`;
     lookupStatus.className = 'lookup-status status-thriving';
   } catch (error) {
     setValue('careProfile', '');
     showLookupPreview(null);
-    lookupStatus.textContent = error.message || 'No local mock profile matched that plant yet.';
+    lookupStatus.textContent = error.message || 'No local care tips matched that plant yet.';
     lookupStatus.className = 'lookup-status status-struggling';
   } finally {
     lookupBtn.disabled = false;
@@ -628,7 +556,6 @@ function applyLookupResult(result) {
 function readCareProfileFromForm(formData) {
   const rawProfile = formData.get('careProfile');
   if (!rawProfile) return null;
-
   try {
     return normalizeCareProfile(JSON.parse(rawProfile));
   } catch {
@@ -638,14 +565,12 @@ function readCareProfileFromForm(formData) {
 
 function normalizeCareProfile(profile) {
   if (!profile || typeof profile !== 'object') return null;
-
   const generatedTasks = Array.isArray(profile.generatedTasks)
     ? profile.generatedTasks.map((task) => String(task).trim()).filter(Boolean).slice(0, 6)
     : [];
   const tags = Array.isArray(profile.tags)
     ? profile.tags.map((tag) => String(tag).trim()).filter(Boolean).slice(0, 6)
     : [];
-
   return {
     provider: String(profile.provider || 'mock-local'),
     matchedFrom: String(profile.matchedFrom || '').trim(),
@@ -665,80 +590,51 @@ function showLookupPreview(profile) {
     lookupPreview.hidden = true;
     return;
   }
-
   lookupPreview.hidden = false;
   lookupPreview.innerHTML = `
-    <h3>Suggested Care Profile</h3>
+    <h3>Care Tips</h3>
     <p><strong>${escapeHtml(profile.commonName)}</strong> · ${escapeHtml(profile.sunlight)} · ${escapeHtml(profile.wateringFrequency)}</p>
     <p>${escapeHtml(profile.careNotes)}</p>
-    ${renderTaskList(profile.generatedTasks)}
-    <p class="lookup-source">Provider: ${escapeHtml(profile.provider)}${profile.matchedFrom ? ` · Matched: ${escapeHtml(profile.matchedFrom)}` : ''}</p>
   `;
 }
 
-function renderCareProfileForCard(profile) {
-  if (!profile) return '';
-  return `
-    <div class="care-profile-card">
-      <p><strong>Care notes:</strong> ${escapeHtml(profile.careNotes || 'No care notes generated.')}</p>
-      ${renderTaskList(profile.generatedTasks, 'Generated tasks')}
-    </div>
-  `;
+function renderCareTasks(profile) {
+  if (!profile || !Array.isArray(profile.generatedTasks) || profile.generatedTasks.length === 0) return '';
+  return `<div class="care-tasks"><strong>Gentle reminders</strong><ul>${profile.generatedTasks.map((task) => `<li>${escapeHtml(task)}</li>`).join('')}</ul></div>`;
 }
 
-function renderTaskList(tasks, heading = 'Generated Tasks') {
-  if (!Array.isArray(tasks) || tasks.length === 0) return '';
-  return `
-    <div class="task-list">
-      <strong>${escapeHtml(heading)}:</strong>
-      <ul>${tasks.map((task) => `<li>${escapeHtml(task)}</li>`).join('')}</ul>
-    </div>
-  `;
+function getCareSummary(plant) {
+  if (plant.careProfile?.careNotes) return plant.careProfile.careNotes;
+  return PLANT_TYPE_TIPS[plant.plantType] || PLANT_TYPE_TIPS.other;
 }
 
 function createMockPlantLookupProvider(profiles) {
   const profilesByKey = new Map(profiles.map((profile) => [normalizeLookupText(profile.lookupKey), profile]));
-
   return {
     providerName: 'mock-local',
     async lookupCareProfile(query) {
       const normalizedQuery = normalizeLookupText(query);
       const matchedProfile = findMockProfile(normalizedQuery, profilesByKey);
-      if (!matchedProfile) {
-        throw new Error('No local mock profile matched that plant yet. Try one of the tomato, pepper, cucumber, or marigold examples.');
-      }
-
-      return normalizeCareProfile({
-        ...matchedProfile,
-        provider: this.providerName,
-        matchedFrom: matchedProfile.commonName
-      });
+      if (!matchedProfile) throw new Error('No local care tips matched that plant yet. Try tomato, cucumber, jalapeño, or marigold.');
+      return normalizeCareProfile({ ...matchedProfile, provider: this.providerName, matchedFrom: matchedProfile.commonName });
     }
   };
 }
 
 function findMockProfile(normalizedQuery, profilesByKey) {
   if (profilesByKey.has(normalizedQuery)) return profilesByKey.get(normalizedQuery);
-
   const queryTokens = new Set(normalizedQuery.split(' ').filter(Boolean));
   for (const [key, profile] of profilesByKey.entries()) {
     const keyTokens = key.split(' ').filter(Boolean);
     const everyKeyTokenFound = keyTokens.every((token) => queryTokens.has(token));
-    if (normalizedQuery.includes(key) || key.includes(normalizedQuery) || everyKeyTokenFound) {
-      return profile;
-    }
+    if (normalizedQuery.includes(key) || key.includes(normalizedQuery) || everyKeyTokenFound) return profile;
   }
-
+  if (normalizedQuery.includes('tomato')) return profilesByKey.get('roma tomato');
   return null;
 }
 
 function normalizeLookupText(text) {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/[ñ]/g, 'n')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .replace(/\s+/g, ' ');
+  return String(text || '').toLowerCase().replace(/[ñ]/g, 'n').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 }
 
 function makeMockProfile(profile) {
@@ -747,15 +643,12 @@ function makeMockProfile(profile) {
 
 function getWateringStatus(plant) {
   const interval = WATERING_INTERVAL_DAYS[plant.wateringFrequency];
-  if (!interval || !plant.lastWatered) {
-    return { label: 'Unknown', className: 'status-watch' };
-  }
-
+  if (!interval || !plant.lastWatered) return { label: 'Check water', className: 'status-watch' };
   const days = getDaysSince(plant.lastWatered);
-  if (!Number.isFinite(days)) return { label: 'Unknown', className: 'status-watch' };
-  if (days >= interval) return { label: 'Due now', className: 'status-struggling' };
-  if (days === interval - 1) return { label: 'Due soon', className: 'status-watch' };
-  return { label: 'On track', className: 'status-thriving' };
+  if (!Number.isFinite(days)) return { label: 'Check water', className: 'status-watch' };
+  if (days >= interval) return { label: 'Water today', className: 'status-struggling' };
+  if (days === interval - 1) return { label: 'Water soon', className: 'status-watch' };
+  return { label: 'Watered', className: 'status-thriving' };
 }
 
 function renderSeasonPanel() {
@@ -763,7 +656,6 @@ function renderSeasonPanel() {
   seasonPill.textContent = `Current season: ${season.name}`;
   seasonTip.textContent = season.tip;
   seasonChange.textContent = `Next season (${season.nextSeason}) starts in ${season.daysToNextSeason} day(s).`;
-
   categoryTips.innerHTML = '';
   Object.entries(PLANT_TYPE_TIPS).forEach(([key, tip]) => {
     const li = document.createElement('li');
@@ -777,11 +669,10 @@ function getCurrentSeason() {
   const year = now.getFullYear();
   const boundaries = [
     { name: 'Spring', start: new Date(year, 2, 20), nextSeason: 'Summer', tip: 'Growth can speed up. Check soil moisture more often.' },
-    { name: 'Summer', start: new Date(year, 5, 21), nextSeason: 'Fall', tip: 'Heat can dry pots faster. Shade stress can happen in hot afternoons.' },
+    { name: 'Summer', start: new Date(year, 5, 21), nextSeason: 'Fall', tip: 'Heat can dry raised beds faster. Morning watering is gentle on plants.' },
     { name: 'Fall', start: new Date(year, 8, 22), nextSeason: 'Winter', tip: 'Growth may slow down. Ease up on heavy feeding.' },
-    { name: 'Winter', start: new Date(year, 11, 21), nextSeason: 'Spring', tip: 'Many plants need less water now. Keep good window light.' }
+    { name: 'Winter', start: new Date(year, 11, 21), nextSeason: 'Spring', tip: 'Many plants need less water now. Watch for cold snaps.' }
   ];
-
   let season = boundaries[0];
   for (let i = boundaries.length - 1; i >= 0; i -= 1) {
     if (now >= boundaries[i].start) {
@@ -789,7 +680,6 @@ function getCurrentSeason() {
       break;
     }
   }
-
   const nextStart = getNextSeasonStart(season.name, year);
   const daysToNextSeason = Math.max(0, Math.ceil((nextStart - now) / 86400000));
   return { ...season, daysToNextSeason };
@@ -802,51 +692,39 @@ function getNextSeasonStart(seasonName, year) {
   return new Date(year + 1, 2, 20);
 }
 
+function getDefaultSpot(index) {
+  const presets = Object.values(SPOT_PRESETS);
+  return presets[index % presets.length];
+}
 
-function getDefaultZone(index) {
-  const columns = 3;
-  const row = Math.floor(index / columns);
-  const col = index % columns;
-  return {
-    x: 6 + col * 31,
-    y: 8 + (row % 3) * 29,
-    width: 26,
-    height: 22
-  };
+function getNearestSpotPreset(x, y) {
+  let nearest = 'center';
+  let nearestDistance = Infinity;
+  for (const [key, preset] of Object.entries(SPOT_PRESETS)) {
+    const distance = Math.hypot(Number(x) - preset.x, Number(y) - preset.y);
+    if (distance < nearestDistance) {
+      nearest = key;
+      nearestDistance = distance;
+    }
+  }
+  return nearest;
+}
+
+function getPlantIcon(name, plantType) {
+  const text = String(name || '').toLowerCase();
+  if (text.includes('tomato')) return '🍅';
+  if (text.includes('marigold')) return '🌼';
+  if (text.includes('cucumber')) return '🥒';
+  if (text.includes('pepper') || text.includes('jalape')) return '🌶️';
+  if (plantType === 'flower') return '🌸';
+  if (plantType === 'herb') return '🌿';
+  return '🌱';
 }
 
 function clampPercent(value, fallback, min = 0, max = 100) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
   return Math.min(max, Math.max(min, Math.round(number)));
-}
-
-function readImageAsResizedDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      reject(new Error('Please choose an image file.'));
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('The photo could not be read.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('The photo could not be prepared.'));
-      img.onload = () => {
-        const maxSize = 1400;
-        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
 }
 
 function getDaysSince(dateString) {
@@ -885,7 +763,7 @@ function makeButton(label, className, onClick) {
 }
 
 function sectionLabel(sectionId) {
-  return sectionId === 'sectionB' ? 'Raised Bed B' : 'Raised Bed A';
+  return sectionId === 'sectionB' ? 'Lower Bed' : 'Upper Bed';
 }
 
 function capitalize(text) {
@@ -899,11 +777,11 @@ function getTodayISO() {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-function escapeHtml(text) {
-  return String(text ?? '')
+function escapeHtml(value) {
+  return String(value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replaceAll("'", '&#039;');
 }
