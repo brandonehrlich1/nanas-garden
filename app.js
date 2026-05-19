@@ -474,21 +474,31 @@ function createBedMap(section) {
   return map;
 }
 
+function getPlantSpriteKey(plant) {
+  const name = (plant.name || '').toLowerCase();
+  if (name.includes('yellow') || name.includes('sun sugar')) return 'yellow-tomato';
+  if (name.includes('tomato')) return 'tomato';
+  if (name.includes('cucumber')) return 'cucumber';
+  if (name.includes('jalape') || name.includes('pepper')) return 'jalapeno';
+  if (name.includes('marigold')) return 'marigold';
+  if (plant.plantType === 'flower') return 'marigold';
+  return 'generic';
+}
+
 function createPlantMarker(sectionId, plant) {
   const marker = document.createElement('button');
-  const waterInfo = getWateringStatus(plant);
   marker.type = 'button';
   marker.className = `plant-marker plant-${plant.plantType}`;
   marker.style.left = `${plant.zoneX}%`;
   marker.style.top = `${plant.zoneY}%`;
   marker.setAttribute('aria-label', `Open ${plant.name || 'plant'} details`);
-  marker.innerHTML = `
-    <span class="plant-icon" aria-hidden="true">${escapeHtml(getPlantArt(plant))}</span>
-    <span class="plant-name">${escapeHtml(plant.name || 'New plant')}</span>
-    <span class="plant-water ${waterInfo.className}">${escapeHtml(getGrowthStageLabel(plant))}</span>
-  `;
   marker.dataset.plantId = plant.id;
-  marker.addEventListener('click', (e) => { e.stopPropagation(); openPlantSheet(sectionId, plant.id); highlightSelection(plant.id);});
+  const spriteKey = getPlantSpriteKey(plant);
+  marker.innerHTML = `
+    <span class="plant-sprite plant-sprite-${escapeHtml(spriteKey)}" aria-hidden="true"></span>
+    <span class="plant-label">${escapeHtml(plant.name || 'New plant')}</span>
+  `;
+  marker.addEventListener('click', (e) => { e.stopPropagation(); openPlantSheet(sectionId, plant.id); highlightSelection(plant.id); });
   return marker;
 }
 
